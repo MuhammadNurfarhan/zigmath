@@ -18,6 +18,11 @@ class CreateStudent extends CreateRecord
             return;
         }
 
+        // SKIP untuk paket Private (tagihan manual di akhir bulan)
+        if ($student->package->type === 'private') {
+            return; // Jangan auto-generate invoice untuk private
+        }
+
         // Ambil durasi paket (default 1 bulan jika tidak diset)
         $months = max(1, (int) ($student->package->duration_months ?? 1));
         $start = now()->startOfMonth();

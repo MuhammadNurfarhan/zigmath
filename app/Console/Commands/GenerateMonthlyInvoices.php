@@ -10,6 +10,7 @@ use Illuminate\Console\Command;
 class GenerateMonthlyInvoices extends Command
 {
     protected $signature = 'zigmath:generate-invoices {--period= : Format YYYY-MM, default bulan ini}';
+
     protected $description = 'Generate tagihan bulanan otomatis untuk siswa aktif';
 
     public function handle(): int
@@ -17,7 +18,12 @@ class GenerateMonthlyInvoices extends Command
         $period = $this->option('period') ?? now()->format('Y-m');
         $currentDate = Carbon::parse("{$period}-01");
 
-        $students = Student::where('status', 'active')->with('package')->get();
+        $students = Student::where('status', 'active')
+            ->whereHas('package', function ($query) {
+                $query->where('type', 'regular'); // ← Hanya reguler
+            })
+            ->with('package')
+            ->get();
 
         $created = 0;
         $skipped = 0;
@@ -28,9 +34,10 @@ class GenerateMonthlyInvoices extends Command
         $bar->start();
 
         foreach ($students as $student) {
-            if (!$student->package) {
+            if (! $student->package) {
                 $expired++;
                 $bar->advance();
+
                 continue;
             }
 
@@ -42,6 +49,7 @@ class GenerateMonthlyInvoices extends Command
             if ($exists) {
                 $skipped++;
                 $bar->advance();
+
                 continue;
             }
 
@@ -57,6 +65,7 @@ class GenerateMonthlyInvoices extends Command
                 if ($currentDate->gte($activeUntil)) {
                     $expired++;
                     $bar->advance();
+
                     continue;
                 }
             }
@@ -66,19 +75,19 @@ class GenerateMonthlyInvoices extends Command
             $dueDate = $currentDate->copy()->day(min($dueDay, 28));
 
             $seqNumber = Invoice::where('period', $period)->withTrashed()->count() + 1;
-            $invoiceNo = 'INV/ZGM/' . str_replace('-', '', $period) . '/' . str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
+            $invoiceNo = 'INV/ZGM/'.str_replace('-', '', $period).'/'.str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
 
             Invoice::create([
-                'invoice_no'        => $invoiceNo,
-                'student_id'        => $student->id,
-                'period'            => $period,
-                'due_date'          => $dueDate,
-                'amount'            => $student->package->price,
-                'discount'          => 0,
-                'paid_amount'       => 0,
+                'invoice_no' => $invoiceNo,
+                'student_id' => $student->id,
+                'period' => $period,
+                'due_date' => $dueDate,
+                'amount' => $student->package->price,
+                'discount' => 0,
+                'paid_amount' => 0,
                 'remaining_balance' => $student->package->price,
-                'status'            => 'unpaid',
-                'created_by'        => null,
+                'status' => 'unpaid',
+                'created_by' => null,
             ]);
 
             $created++;
@@ -87,7 +96,7 @@ class GenerateMonthlyInvoices extends Command
 
         $bar->finish();
         $this->newLine(2);
-        $this->info("✅ Done!");
+        $this->info('✅ Done!');
         $this->table(
             ['Status', 'Jumlah'],
             [

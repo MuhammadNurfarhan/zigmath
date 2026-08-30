@@ -13,10 +13,15 @@ use Filament\Tables\Table;
 class PackageResource extends Resource
 {
     protected static ?string $model = Package::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-gift';
+
     protected static ?string $navigationGroup = 'Data Master';
+
     protected static ?string $navigationLabel = 'Paket Belajar';
+
     protected static ?string $modelLabel = 'Paket';
+
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
@@ -38,11 +43,20 @@ class PackageResource extends Resource
                     ->required(),
 
                 Forms\Components\TextInput::make('price')
-                    ->label('Harga (Rp)')
+                    ->label('Harga per Bulan (Reguler)')
                     ->numeric()
                     ->prefix('Rp')
                     ->required()
-                    ->minValue(0),
+                    ->minValue(0)
+                    ->visible(fn (callable $get) => $get('type') === 'regular'), // ← Hanya muncul jika Reguler
+
+                Forms\Components\TextInput::make('price_per_session')
+                    ->label('Harga per Sesi (Private)')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->minValue(0)
+                    ->visible(fn (callable $get) => $get('type') === 'private') // ← Hanya muncul jika Private
+                    ->helperText('Contoh: 50000 = Rp 50.000 per sesi'),
 
                 Forms\Components\TextInput::make('duration_months')
                     ->label('Durasi (Bulan)')
@@ -90,22 +104,28 @@ class PackageResource extends Resource
                         'primary' => 'regular',
                         'warning' => 'private',
                     ])
-                    ->formatStateUsing(fn(string $state): string =>
-                        $state === 'regular' ? '📚 Reguler' : '👤 Private'
+                    ->formatStateUsing(fn (string $state): string => $state === 'regular' ? '📚 Reguler' : '👤 Private'
                     ),
 
                 Tables\Columns\TextColumn::make('price')
-                    ->label('Harga')
+                    ->label('Harga/Bulan')
                     ->money('IDR')
-                    ->sortable(),
+                    ->sortable()
+                    ->visible(fn ($record) => $record?->type === 'regular'),
+
+                Tables\Columns\TextColumn::make('price_per_session')
+                    ->label('Harga/Sesi')
+                    ->money('IDR')
+                    ->sortable()
+                    ->visible(fn ($record) => $record?->type === 'private'),
 
                 Tables\Columns\TextColumn::make('duration_months')
                     ->label('Durasi')
-                    ->formatStateUsing(fn(int $state): string => "{$state} Bulan"),
+                    ->formatStateUsing(fn (int $state): string => "{$state} Bulan"),
 
                 Tables\Columns\TextColumn::make('sessions_count')
                     ->label('Pertemuan')
-                    ->formatStateUsing(fn(?int $state): string => $state ? "{$state} Sesi" : 'Unlimited'),
+                    ->formatStateUsing(fn (?int $state): string => $state ? "{$state} Sesi" : 'Unlimited'),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Status')

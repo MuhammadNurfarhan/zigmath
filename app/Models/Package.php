@@ -11,12 +11,13 @@ class Package extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'name', 'type', 'price', 'duration_months',
+        'name', 'type', 'price', 'price_per_session', 'duration_months',
         'sessions_count', 'duration_minutes', 'description', 'is_active'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'price_per_session' => 'decimal:2',
         'is_active' => 'boolean',
         'duration_months' => 'integer',
         'sessions_count' => 'integer',
