@@ -12,15 +12,20 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
-use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 
 class StudentResource extends Resource
 {
     protected static ?string $model = Student::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-users';
+
     protected static ?string $navigationGroup = 'Data Master';
+
     protected static ?string $navigationLabel = 'Siswa';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Form $form): Form
@@ -111,6 +116,9 @@ class StudentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->withSum('invoices', 'remaining_balance')
+                ->withSum('invoices', 'paid_amount')
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama Siswa')
@@ -120,8 +128,7 @@ class StudentResource extends Resource
                 Tables\Columns\BadgeColumn::make('class_type')
                     ->label('Kelas')
                     ->colors(['primary' => 'regular', 'warning' => 'private'])
-                    ->formatStateUsing(fn(string $state): string =>
-                        $state === 'regular' ? 'Reguler' : 'Private'
+                    ->formatStateUsing(fn (string $state): string => $state === 'regular' ? 'Reguler' : 'Private'
                     ),
 
                 Tables\Columns\TextColumn::make('package.name')
@@ -139,7 +146,7 @@ class StudentResource extends Resource
 
                 Tables\Columns\TextColumn::make('due_day')
                     ->label('Jatuh Tempo')
-                    ->formatStateUsing(fn(int $state): string => "Tgl {$state}")
+                    ->formatStateUsing(fn (int $state): string => "Tgl {$state}")
                     ->sortable(),
 
                 Tables\Columns\BadgeColumn::make('status')
@@ -149,7 +156,7 @@ class StudentResource extends Resource
                         'danger' => 'inactive',
                         'warning' => 'cuti',
                     ])
-                    ->formatStateUsing(fn(string $state): string => match($state) {
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
                         'active' => 'Aktif',
                         'inactive' => 'Nonaktif',
                         'cuti' => 'Cuti',
@@ -159,7 +166,14 @@ class StudentResource extends Resource
                     ->label('Tunggakan')
                     ->money('IDR')
                     ->sortable()
-                    ->color(fn(?float $state): string => ($state ?? 0) > 0 ? 'danger' : 'success'),
+                    ->searchable(false)
+                    ->color(fn (?float $state): string => ($state ?? 0) > 0 ? 'danger' : 'success'),
+
+                Tables\Columns\TextColumn::make('invoices_sum_paid_amount')
+                    ->label('Total Terbayar')
+                    ->money('IDR')
+                    ->sortable()
+                    ->color('success'),
             ])
             ->defaultSort('name')
             ->filters([
@@ -175,12 +189,11 @@ class StudentResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('invoices')
+                Action::make('invoices')
                     ->label('📄 Tagihan')
                     ->icon('heroicon-o-document-text')
                     ->color('info')
-                    ->url(fn(Student $record): string =>
-                        StudentResource::getUrl('invoices', ['record' => $record])
+                    ->url(fn (Student $record): string => StudentResource::getUrl('invoices', ['record' => $record])
                     ),
                 Tables\Actions\DeleteAction::make(),
             ])
