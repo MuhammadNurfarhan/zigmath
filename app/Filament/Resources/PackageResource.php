@@ -40,7 +40,8 @@ class PackageResource extends Resource
                         'regular' => '📚 Reguler',
                         'private' => '👤 Private',
                     ])
-                    ->required(),
+                    ->required()
+                    ->live(),
 
                 Forms\Components\TextInput::make('price')
                     ->label('Harga per Bulan (Reguler)')
