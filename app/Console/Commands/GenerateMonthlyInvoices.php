@@ -19,9 +19,7 @@ class GenerateMonthlyInvoices extends Command
         $currentDate = Carbon::parse("{$period}-01");
 
         $students = Student::where('status', 'active')
-            ->whereHas('package', function ($query) {
-                $query->where('type', 'regular'); // ← Hanya reguler
-            })
+            ->whereHas('package')
             ->with('package')
             ->get();
 
@@ -55,7 +53,6 @@ class GenerateMonthlyInvoices extends Command
 
             // Cek masa aktif paket (hanya untuk non-bulanan)
             $duration = (int) ($student->package->duration_months ?? 1);
-
             if ($duration > 1) {
                 $joinDate = $student->join_date
                     ? Carbon::parse($student->join_date)
@@ -70,6 +67,34 @@ class GenerateMonthlyInvoices extends Command
                 }
             }
 
+            // PERBAIKAN 2: Logika Perhitungan Amount (Reguler vs Private)
+            $amount = 0;
+            $notes = '';
+
+            if ($student->class_type === 'regular') {
+                $amount = $student->package->price;
+                $notes = 'Paket Reguler Bulanan';
+            } elseif ($student->class_type === 'private') {
+                // Jika Private menggunakan sistem "Per Sesi"
+                if ($student->package->price_per_session > 0 && $student->package->sessions_count > 0) {
+                    $amount = $student->package->price_per_session * $student->package->sessions_count;
+                    $notes = "Private: {$student->package->sessions_count} sesi x Rp ".number_format($student->package->price_per_session, 0, ',', '.');
+                }
+                // Jika Private menggunakan sistem "Paket Tetap" (price biasa)
+                else {
+                    $amount = $student->package->price;
+                    $notes = 'Paket Private Bulanan';
+                }
+            }
+
+            // Fallback jika amount 0
+            if ($amount <= 0) {
+                $expired++; // Anggap skip jika harga 0
+                $bar->advance();
+
+                continue;
+            }
+
             // Generate invoice
             $dueDay = $student->due_day ?? 5;
             $dueDate = $currentDate->copy()->day(min($dueDay, 28));
@@ -82,11 +107,12 @@ class GenerateMonthlyInvoices extends Command
                 'student_id' => $student->id,
                 'period' => $period,
                 'due_date' => $dueDate,
-                'amount' => $student->package->price,
+                'amount' => $amount,
                 'discount' => 0,
                 'paid_amount' => 0,
-                'remaining_balance' => $student->package->price,
+                'remaining_balance' => $amount,
                 'status' => 'unpaid',
+                'notes' => $notes,
                 'created_by' => null,
             ]);
 
