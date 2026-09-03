@@ -99,7 +99,16 @@ class GenerateMonthlyInvoices extends Command
             $dueDay = $student->due_day ?? 5;
             $dueDate = $currentDate->copy()->day(min($dueDay, 28));
 
-            $seqNumber = Invoice::where('period', $period)->withTrashed()->count() + 1;
+            // Gunakan max() di level database (lebih cepat dan aman untuk soft delete)
+            $maxInvoiceNo = Invoice::withTrashed()
+                ->where('period', $period)
+                ->max('invoice_no');
+
+            $seqNumber = 1;
+            if ($maxInvoiceNo && preg_match('/(\d{4})$/', $maxInvoiceNo, $matches)) {
+                $seqNumber = ((int) $matches[1]) + 1;
+            }
+
             $invoiceNo = 'INV/ZGM/'.str_replace('-', '', $period).'/'.str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
 
             Invoice::create([
