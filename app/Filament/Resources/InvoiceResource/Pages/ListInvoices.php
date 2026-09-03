@@ -8,6 +8,7 @@ use App\Models\Student;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -28,14 +29,15 @@ class ListInvoices extends ListRecords
                 ->color('warning')
                 ->form([
                     TextInput::make('period')
-                        ->label('Periode Bulan (YYYY-MM)')
+                        ->label('Periode Bulan (Tahun-Bulan)')
                         ->default(now()->format('Y-m'))
-                        ->required(),
+                        ->required()
+                        ->helperText('Format: YYYY-MM, misal 2024-06 untuk Juni 2024.'),
 
                     Repeater::make('items')
                         ->label('Daftar Siswa Private Aktif')
                         ->schema([
-                            TextInput::make('student_id')->hidden(),
+                            Hidden::make('student_id'),
 
                             TextInput::make('student_name')
                                 ->label('Nama Siswa')
@@ -80,7 +82,14 @@ class ListInvoices extends ListRecords
                     $skipped = 0;
 
                     foreach ($data['items'] ?? [] as $item) {
-                        $student = Student::with('package')->find($item['student_id'] ?? null);
+                        $studentId = $item['student_id'] ?? null;
+                        if (! $studentId) {
+                            $skipped++;
+
+                            continue;
+                        }
+
+                        $student = Student::with('package')->find($studentId);
 
                         if (! $student || ! $student->package) {
                             $skipped++;
@@ -100,7 +109,12 @@ class ListInvoices extends ListRecords
                         }
 
                         $sessions = (int) ($item['sessions'] ?? 0);
-                        $pricePerSession = (float) ($student->package->price_per_session ?? 0);
+                        $pkg = $student->package;
+
+                        // FIX LOGIKA: Ambil LANGSUNG harga per sesi, JANGAN dibagi sessions_count
+                        $pricePerSession = (float) ($pkg->price_per_session ?? $pkg->price);
+
+                        // Total = Jumlah Sesi × Harga Per Sesi (Misal: 8 × 50.000 = 400.000)
                         $total = $sessions * $pricePerSession;
 
                         if ($sessions <= 0 || $total <= 0) {
@@ -112,8 +126,15 @@ class ListInvoices extends ListRecords
                         $dueDay = $student->due_day ?? 5;
                         $dueDate = Carbon::parse("{$period}-01")->day(min($dueDay, 28));
 
-                        $seq = Invoice::where('period', $period)->withTrashed()->count() + 1;
-                        $invoiceNo = 'INV/ZGM/'.str_replace('-', '', $period).'/'.str_pad($seq, 4, '0', STR_PAD_LEFT);
+                        $maxInvoiceNo = Invoice::withTrashed()
+                            ->where('period', $period)
+                            ->max('invoice_no');
+
+                        $seqNumber = 1;
+                        if ($maxInvoiceNo && preg_match('/(\d{4})$/', $maxInvoiceNo, $matches)) {
+                            $seqNumber = ((int) $matches[1]) + 1;
+                        }
+                        $invoiceNo = 'INV/ZGM/'.str_replace('-', '', $period).'/'.str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
 
                         Invoice::create([
                             'invoice_no' => $invoiceNo,
