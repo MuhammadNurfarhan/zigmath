@@ -10,8 +10,8 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class StudentResource extends Resource
@@ -93,6 +93,7 @@ class StudentResource extends Resource
                     ->label('Tanggal Jatuh Tempo')
                     ->options(array_combine(range(1, 28), range(1, 28)))
                     ->required()
+                    ->rules(['integer', 'between:1,28'])
                     ->helperText('Tagihan akan jatuh tempo setiap tanggal ini'),
 
                 Forms\Components\DatePicker::make('join_date')
