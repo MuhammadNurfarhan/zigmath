@@ -2,12 +2,11 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Student;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\Student;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Carbon\Carbon;
 
 class StatsOverview extends BaseWidget
 {
@@ -26,16 +25,16 @@ class StatsOverview extends BaseWidget
         return [
             Stat::make('Siswa Aktif', Student::where('status', 'active')->count())
                 ->description("📚 {$activeRegular} Reguler • 👤 {$activePrivate} Private")
-                ->descriptionIcon('heroicon-m-user-group')
+                // ->descriptionIcon('heroicon-m-user-group')
                 ->color('primary'),
 
-            Stat::make('Pemasukan Bulan Ini', 'Rp ' . number_format($totalIncome, 0, ',', '.'))
-                ->description('Bulan ' . now()->translatedFormat('F Y'))
+            Stat::make('Pemasukan Bulan Ini', 'Rp '.number_format($totalIncome, 0, ',', '.'))
+                ->description(now()->translatedFormat('F Y'))
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),
 
-            Stat::make('Belum Bayar', $unpaidCount . ' Tagihan')
-                ->description($unpaidCount > 0 ? '⚠️ Perlu ditindaklanjuti' : '✅ Semua lunas')
+            Stat::make('Belum Bayar', $unpaidCount.' Tagihan')
+                ->description($unpaidCount > 0 ? 'Perlu ditindaklanjuti' : 'Semua lunas')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
                 ->color($unpaidCount > 0 ? 'danger' : 'success'),
         ];
