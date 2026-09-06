@@ -50,8 +50,8 @@ class AdminPanelProvider extends PanelProvider
             ->pages([Pages\Dashboard::class])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
                 StatsOverview::class,
                 IncomeChart::class,
                 DueDateWidget::class,
@@ -76,6 +76,7 @@ class AdminPanelProvider extends PanelProvider
                 'Keuangan',
                 'Operasional',
                 'Laporan',
+                'Manajemen User',
                 'Pengaturan',
             ]);
     }
