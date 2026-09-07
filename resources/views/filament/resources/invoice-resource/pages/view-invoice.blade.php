@@ -4,23 +4,31 @@
 
 <x-filament-panels::page>
     <div class="space-y-6">
+        {{-- Quick Actions --}}
+        <div class="flex gap-3">
+            <a href="{{ InvoiceResource::getUrl('index') }}"
+                class="px-4 py-2 text-gray-600 dark:text-white rounded-lg hover:text-gray-900">
+                ← Back
+            </a>
+        </div>
+
         {{-- Header Invoice Info --}}
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">📄 Detail Tagihan</h3>
                 <span
-                    class="px-3 py-1 text-sm font-medium rounded-full
+                    class="px-3 py-1 text-base font-bold rounded-full
                     {{ match ($record->status) {
                         'paid' => 'bg-green-100 text-green-800',
                         'partial' => 'bg-yellow-100 text-yellow-800',
                         'overdue' => 'bg-red-100 text-red-800',
-                        'unpaid' => 'bg-gray-100 text-gray-800',
+                        'unpaid' => 'bg-gray-400 text-gray-800',
                         default => 'bg-gray-100 text-gray-800',
                     } }}">
                     {{ match ($record->status) {
                         'paid' => '✅ LUNAS',
                         'partial' => '⏳ CICILAN',
-                        'overdue' => '️ TERLAMBAT',
+                        'overdue' => '❌ TERLAMBAT',
                         'unpaid' => '⏰ BELUM BAYAR',
                         default => strtoupper($record->status),
                     } }}
@@ -164,13 +172,5 @@
                 </div>
             </div>
         @endif
-
-        {{-- Quick Actions --}}
-        <div class="flex gap-3">
-            <a href="{{ InvoiceResource::getUrl('index') }}"
-                class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                ← Kembali
-            </a>
-        </div>
     </div>
 </x-filament-panels::page>
