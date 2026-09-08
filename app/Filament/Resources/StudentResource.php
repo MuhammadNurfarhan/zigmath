@@ -5,10 +5,13 @@ namespace App\Filament\Resources;
 use App\Exports\StudentsExport;
 use App\Filament\Resources\StudentResource\Pages;
 use App\Imports\StudentsImport;
+use App\Models\Package;
 use App\Models\Student;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -50,14 +53,29 @@ class StudentResource extends Resource
                         'private' => '👤 Private',
                     ])
                     ->required()
-                    ->reactive(),
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set) => $set('package_id', null)),
 
                 Forms\Components\Select::make('package_id')
                     ->label('Paket Belajar')
-                    ->relationship('package', 'name')
+                    ->options(function (Get $get) {
+                        $classType = $get('class_type');
+
+                        // Jika kelas belum dipilih, kembalikan array kosong
+                        if (! $classType) {
+                            return [];
+                        }
+
+                        return Package::where('is_active', true)
+                            ->where('type', $classType)
+                            ->pluck('name', 'id');
+                    })
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->disabled(fn (Get $get) => ! $get('class_type'))
+                    ->placeholder(fn (Get $get) => ! $get('class_type') ? '⚠️ Pilih Kelas terlebih dahulu' : '-- Pilih Paket Belajar --')
+                    ->helperText(fn (Get $get) => ! $get('class_type') ? 'Silakan pilih kelas untuk mengaktifkan kolom ini.' : 'Menampilkan paket sesuai kelas yang dipilih.'),
 
                 Forms\Components\TextInput::make('school')
                     ->label('Sekolah')
@@ -194,10 +212,12 @@ class StudentResource extends Resource
                     ->relationship('package', 'name'),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->label('Detail'),
+                Tables\Actions\EditAction::make()
+                    ->label('Edit'),
                 Action::make('invoices')
-                    ->label('📄 Tagihan')
+                    ->label('Tagihan')
                     ->icon('heroicon-o-document-text')
                     ->color('info')
                     ->url(fn (Student $record): string => StudentResource::getUrl('invoices', ['record' => $record])
