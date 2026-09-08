@@ -2,17 +2,22 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\StudentsExport;
 use App\Filament\Resources\StudentResource\Pages;
-use App\Filament\Resources\StudentResource\StudentExporter;
-use App\Filament\Resources\StudentResource\StudentImporter;
+use App\Imports\StudentsImport;
 use App\Models\Student;
 use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class StudentResource extends Resource
 {
@@ -199,12 +204,117 @@ class StudentResource extends Resource
                 Tables\Actions\DeleteAction::make(),
             ])
             ->headerActions([
-                Tables\Actions\ExportAction::make()
-                    ->exporter(StudentExporter::class)
-                    ->label('📥 Export Excel'),
-                Tables\Actions\ImportAction::make()
-                    ->importer(StudentImporter::class)
-                    ->label('📤 Import Excel'),
+                // ==========================================
+                // 📄 DOWNLOAD TEMPLATE (ACTION TERPISAH)
+                // ==========================================
+                Action::make('download_template')
+                    ->label('📄 Template Excel')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('info')
+                    ->url(route('students.download-template'), shouldOpenInNewTab: true)
+                    ->tooltip('Download template Excel untuk import'),
+
+                // ==========================================
+                // 📥 EXPORT EXCEL
+                // ==========================================
+                Action::make('export_excel')
+                    ->label('📥 Export Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(fn () => Excel::download(
+                        new StudentsExport,
+                        'zigmath-siswa-'.now()->format('Y-m-d_His').'.xlsx'
+                    )),
+
+                // ==========================================
+                // 📤 IMPORT EXCEL (TANPA ACTION DI FORM)
+                // ==========================================
+                Action::make('import_excel')
+                    ->label('📤 Import Excel')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->color('warning')
+                    ->modalHeading('Import Data Siswa dari Excel')
+                    ->modalDescription('Upload file Excel (.xlsx) yang berisi data siswa. Pastikan format sesuai template.')
+                    ->modalWidth('lg')
+                    ->form([
+                        // ✅ SEKARANG HANYA BERISI KOMPONEN FORM
+                        FileUpload::make('file')
+                            ->label('Upload File Excel (.xlsx / .csv)')
+                            ->acceptedFileTypes([
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                'application/vnd.ms-excel',
+                                'text/csv',
+                            ])
+                            ->disk('local')
+                            ->directory('imports/students')
+                            ->maxSize(10240)
+                            ->required()
+                            ->helperText('Maksimal 10 MB. Download template dulu lewat tombol "Template Excel" di atas.'),
+                    ])
+                    ->action(function (array $data): void {
+                        $import = new StudentsImport;
+
+                        try {
+                            Excel::import(
+                                $import,
+                                Storage::disk('local')->path($data['file'])
+                            );
+                        } catch (ValidationException $e) {
+                            $failures = $e->failures();
+                            $errors = [];
+                            foreach (array_slice($failures, 0, 10) as $failure) {
+                                $errors[] = "Baris {$failure->row()}: ".implode(', ', $failure->errors());
+                            }
+
+                            Notification::make()
+                                ->title('⚠️ Import Gagal')
+                                ->body(
+                                    'Terdapat '.count($failures).' error validasi. Contoh: '
+                                    .implode(' | ', $errors)
+                                )
+                                ->danger()
+                                ->duration(10000)
+                                ->send();
+
+                            Storage::disk('local')->delete($data['file']);
+
+                            return;
+                        }
+
+                        // Cleanup file upload
+                        Storage::disk('local')->delete($data['file']);
+
+                        // Notifikasi ringkasan
+                        $summary = $import->summary;
+                        $body = "✅ Berhasil: {$summary['success']} siswa. ";
+                        if ($summary['failed'] > 0) {
+                            $body .= "❌ Gagal: {$summary['failed']} siswa.";
+                        } else {
+                            $body .= 'Tidak ada error.';
+                        }
+
+                        Notification::make()
+                            ->title('Import Selesai!')
+                            ->body($body)
+                            ->success()
+                            ->duration(8000)
+                            ->send();
+
+                        // Detail error jika ada
+                        if ($summary['failed'] > 0 && ! empty($summary['errors'])) {
+                            $errorList = collect($summary['errors'])
+                                ->take(15)
+                                ->map(fn ($err) => "Baris {$err['row']}: {$err['reason']}")
+                                ->implode('<br>');
+
+                            Notification::make()
+                                ->title('📋 Detail Error Import')
+                                ->body($errorList)
+                                ->warning()
+                                ->duration(15000)
+                                ->send();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
