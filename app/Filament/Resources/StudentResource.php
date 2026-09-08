@@ -13,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -221,10 +222,15 @@ class StudentResource extends Resource
                     ->label('📥 Export Excel')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('success')
-                    ->action(fn () => Excel::download(
-                        new StudentsExport,
-                        'zigmath-siswa-'.now()->format('Y-m-d_His').'.xlsx'
-                    )),
+                    ->action(function (HasTable $livewire) {
+
+                        $filteredQuery = $livewire->getFilteredSortedTableQuery()->with('package');
+
+                        return Excel::download(
+                            new StudentsExport($filteredQuery),
+                            'zigmath-siswa-'.now()->format('Y-m-d_His').'.xlsx'
+                        );
+                    }),
 
                 // ==========================================
                 // 📤 IMPORT EXCEL (TANPA ACTION DI FORM)

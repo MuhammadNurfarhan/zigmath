@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Student;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -12,9 +12,16 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class StudentsExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping, WithStyles
 {
+    protected Builder $query;
+
+    public function __construct(Builder $query)
+    {
+        $this->query = $query;
+    }
+
     public function query()
     {
-        return Student::query()->with('package');
+        return $this->query;
     }
 
     public function headings(): array
