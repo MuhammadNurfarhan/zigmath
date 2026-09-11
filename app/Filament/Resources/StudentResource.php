@@ -4,7 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Exports\StudentsExport;
 use App\Filament\Resources\StudentResource\Pages;
+use App\Filament\Resources\StudentResource\RelationManagers\AttendancesRelationManager;
+use App\Filament\Resources\StudentResource\RelationManagers\SchedulesRelationManager;
 use App\Imports\StudentsImport;
+use App\Models\Attendance;
 use App\Models\Package;
 use App\Models\Student;
 use Filament\Forms;
@@ -199,6 +202,16 @@ class StudentResource extends Resource
                     ->money('IDR')
                     ->sortable()
                     ->color('success'),
+                // Tables\Columns\TextColumn::make('attendance_rate')
+                //     ->label('% Hadir Bulan Ini')
+                //     ->getStateUsing(fn (Student $record) => Attendance::getAttendanceRate($record->id, now()->month, now()->year).'%')
+                //     ->badge()
+                //     ->color(fn (string $state): string => match (true) {
+                //         (float) $state >= 80 => 'success',
+                //         (float) $state >= 50 => 'warning',
+                //         default => 'danger',
+                //     })
+                //     ->sortable(false),
             ])
             ->defaultSort('name')
             ->filters([
@@ -347,6 +360,14 @@ class StudentResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            SchedulesRelationManager::class,
+            AttendancesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
