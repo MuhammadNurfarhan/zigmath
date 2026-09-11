@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class DueDateWidget extends Widget
 {
-    protected static string $view = 'filament.widgets.due-date-widget';
+    protected static string $view = 'filament.widgets.due-date';
 
     protected static ?int $sort = 3;
 
