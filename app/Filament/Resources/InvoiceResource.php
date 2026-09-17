@@ -211,7 +211,7 @@ class InvoiceResource extends Resource
             ->actions([
                 // ACTION INPUT BAYAR LANGSUNG DARI TABEL
                 Action::make('pay')
-                    ->label('💰 Bayar')
+                    ->label('Bayar')
                     ->icon('heroicon-o-banknotes')
                     ->color('success')
                     ->visible(fn (Invoice $record) => in_array($record->status, ['unpaid', 'partial', 'overdue']))

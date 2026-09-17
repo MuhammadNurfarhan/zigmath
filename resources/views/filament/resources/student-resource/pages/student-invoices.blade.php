@@ -49,7 +49,8 @@
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
             <p class="text-xs text-gray-500 uppercase tracking-wide">Status</p>
-            <p class="text-2xl font-bold mt-1 {{ $this->getRecord()->invoices->sum('remaining_balance') > 0 ? 'text-rose-600' : 'text-emerald-600' }}">
+            <p
+                class="text-2xl font-bold mt-1 {{ $this->getRecord()->invoices->sum('remaining_balance') > 0 ? 'text-rose-600' : 'text-emerald-600' }}">
                 {{ $this->getRecord()->invoices->sum('remaining_balance') > 0 ? '⚠️ Ada Tunggakan' : '✅ Lunas Semua' }}
             </p>
         </div>
@@ -62,7 +63,8 @@
                 📋 Tabel Angsuran Bulanan
             </h3>
             <p class="text-sm text-gray-500 mt-1">
-                Klik tombol "💰 Input Bayar" untuk mencatat pembayaran
+                Klik tombol <span class="text-base">"Input Bayar"</span> untuk
+                mencatat pembayaran
             </p>
         </div>
         <div class="p-4">
