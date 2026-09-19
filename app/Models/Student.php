@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
 
 class Student extends Model
 {
@@ -13,7 +15,7 @@ class Student extends Model
     protected $fillable = [
         'name', 'class_type', 'package_id', 'parent_name', 'parent_phone',
         'school', 'school_grade', 'subject', 'address', 'due_day',
-        'join_date', 'status', 'notes', 'created_by', 'updated_by'
+        'join_date', 'status', 'notes', 'created_by', 'updated_by',
     ];
 
     protected $casts = [
@@ -31,9 +33,11 @@ class Student extends Model
         return $this->hasMany(Invoice::class);
     }
 
-    public function schedules(): HasMany
+    public function schedules(): BelongsToMany
     {
-        return $this->hasMany(Schedule::class);
+        return $this->belongsToMany(Schedule::class, 'schedule_students')
+            ->withPivot('status')
+            ->withTimestamps();
     }
 
     public function attendances(): HasMany
@@ -53,8 +57,7 @@ class Student extends Model
 
     public function scopeOverdueInvoices($query)
     {
-        return $query->whereHas('invoices', fn($q) =>
-            $q->whereIn('status', ['unpaid', 'overdue', 'partial'])
+        return $query->whereHas('invoices', fn ($q) => $q->whereIn('status', ['unpaid', 'overdue', 'partial'])
         );
     }
 

@@ -6,7 +6,9 @@ use App\Filament\Resources\ScheduleResource\Pages;
 use App\Models\Schedule;
 use Closure;
 use Filament\Forms;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -29,12 +31,49 @@ class ScheduleResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Jadwal Belajar')
                     ->schema([
-                        Forms\Components\Select::make('student_id')
+                        Forms\Components\Select::make('students')
                             ->label('Siswa')
-                            ->relationship('student', 'name')
+                            ->placeholder('Pilih Siswa')
+                            ->relationship('students', 'name')
+                            ->multiple()
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->rules([
+                                function (Get $get, Component $component) {
+                                    return function (string $attribute, $value, Closure $fail) use ($get, $component) {
+                                        if (empty($value)) {
+                                            return;
+                                        }
+
+                                        $day = $get('day_of_week');
+                                        $start = $get('start_time');
+                                        $end = $get('end_time');
+
+                                        if (! $day || ! $start || ! $end) {
+                                            return;
+                                        }
+
+                                        $record = $component->getRecord();
+
+                                        // Cek bentrok siswa
+                                        $query = Schedule::query()
+                                            ->where('day_of_week', $day)
+                                            ->where('start_time', '<', $end)
+                                            ->where('end_time', '>', $start)
+                                            ->whereHas('students', fn ($q) => $q->whereIn('students.id', $value));
+
+                                        // PENTING: Kecualikan record saat ini jika sedang mode EDIT
+                                        if ($record) {
+                                            $query->where('id', '!=', $record->id);
+                                        }
+
+                                        if ($query->exists()) {
+                                            $fail('Salah satu siswa yang dipilih sudah memiliki jadwal yang bentrok di hari dan jam tersebut.');
+                                        }
+                                    };
+                                },
+                            ]),
 
                         Forms\Components\TextInput::make('tutor_name')
                             ->label('Nama Tutor')
@@ -43,7 +82,7 @@ class ScheduleResource extends Resource
 
                         Forms\Components\Select::make('day_of_week')
                             ->label('Hari')
-                            ->options(Schedule::getDayOptions())
+                            ->options(Schedule::getDayOptions()) // Pastikan method ini ada di Model
                             ->required(),
 
                         Forms\Components\TimePicker::make('start_time')
@@ -56,25 +95,17 @@ class ScheduleResource extends Resource
                             ->seconds(false)
                             ->required()
                             ->rules([
-                                fn ($get, $record): Closure => function (string $attribute, $value, Closure $fail) use ($get, $record) {
-                                    // Pastikan field lain sudah diisi sebelum cek bentrok
-                                    if (! $get('student_id') || ! $get('tutor_name') || ! $get('day_of_week') || ! $get('start_time')) {
-                                        return;
-                                    }
+                                function (Get $get) {
+                                    return function (string $attribute, $value, Closure $fail) use ($get) {
+                                        $start = $get('start_time');
 
-                                    // Buat instance temporary untuk cek bentrok
-                                    $tempSchedule = new Schedule([
-                                        'student_id' => $get('student_id'),
-                                        'tutor_name' => $get('tutor_name'),
-                                        'day_of_week' => $get('day_of_week'),
-                                        'start_time' => $get('start_time'),
-                                        'end_time' => $value,
-                                    ]);
+                                        // Validasi dasar: Jam selesai harus lebih besar dari jam mulai
+                                        if ($start && $value <= $start) {
+                                            $fail('Jam selesai harus lebih besar dari jam mulai.');
 
-                                    // Cek bentrok menggunakan method dari Model Anda
-                                    if ($tempSchedule->hasConflict($record?->id)) {
-                                        $fail($tempSchedule->getConflictDetails() ?? 'Jadwal bentrok dengan jadwal lain.');
-                                    }
+                                            return;
+                                        }
+                                    };
                                 },
                             ]),
 
@@ -114,19 +145,25 @@ class ScheduleResource extends Resource
         return $table
             ->query(
                 Schedule::query()
-                    ->with(['student'])
+                    ->with(['students']) // FIX: dari 'student' menjadi 'students'
                     ->orderBy('day_of_week')
                     ->orderBy('start_time')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('student.name')
-                    ->label('Siswa')
-                    ->searchable()
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('tutor_name')
                     ->label('Tutor')
                     ->searchable(),
+
+                Tables\Columns\TextColumn::make('students.name')
+                    ->label('Siswa')
+                    ->badge()
+                    ->limit(3)
+                    ->toggleable(),
+
+                Tables\Columns\TextColumn::make('students_count')
+                    ->counts('students')
+                    ->label('Jumlah Siswa')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('day_of_week')
                     ->label('Hari')
@@ -165,9 +202,11 @@ class ScheduleResource extends Resource
                     ->label('Hari')
                     ->options(Schedule::getDayOptions()),
 
-                Tables\Filters\SelectFilter::make('student_id')
+                // FIX: Filter siswa disesuaikan dengan relasi many-to-many
+                Tables\Filters\SelectFilter::make('students')
                     ->label('Siswa')
-                    ->relationship('student', 'name')
+                    ->relationship('students', 'name')
+                    ->multiple()
                     ->searchable()
                     ->preload(),
 
