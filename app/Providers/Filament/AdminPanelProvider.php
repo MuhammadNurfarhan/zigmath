@@ -54,7 +54,7 @@ class AdminPanelProvider extends PanelProvider
                 // Widgets\FilamentInfoWidget::class,
                 StatsOverview::class,
                 IncomeChart::class,
-                DueDateWidget::class,
+                // DueDateWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
