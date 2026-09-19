@@ -16,7 +16,7 @@ class RekapAbsensiPage extends Page
 
     protected static ?string $title = 'Rekap Absensi Bulanan';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     protected static string $view = 'filament.pages.rekap-absensi';
 

@@ -18,9 +18,9 @@ class AttendanceResource extends Resource
 
     protected static ?string $navigationGroup = 'Operasional';
 
-    protected static ?string $navigationLabel = 'Absensi';
+    protected static ?string $navigationLabel = ' Riwayat Absensi';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
