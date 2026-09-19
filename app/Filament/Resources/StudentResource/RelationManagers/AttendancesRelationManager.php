@@ -38,13 +38,11 @@ class AttendancesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-                Attendance::query()->orderByDesc('date')
-            )
             ->columns([
                 Tables\Columns\TextColumn::make('date')
                     ->label('Tanggal')
-                    ->date('d M Y'),
+                    ->date('d M Y')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -62,10 +60,29 @@ class AttendancesRelationManager extends RelationManager
                     ->label('Keterangan')
                     ->limit(30)
                     ->placeholder('-'),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Dicatat Pada')
+                    ->dateTime('d M Y H:i')
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(Attendance::getStatusOptions()),
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ]);
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
+            ->defaultSort('date', 'desc');
     }
 }

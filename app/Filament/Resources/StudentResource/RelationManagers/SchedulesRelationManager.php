@@ -76,6 +76,12 @@ class SchedulesRelationManager extends RelationManager
                     ->label('Ruangan')
                     ->placeholder('-'),
 
+                Tables\Columns\TextColumn::make('students_count')
+                    ->counts('students')
+                    ->label('Jumlah Siswa')
+                    ->badge()
+                    ->color('info'),
+
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -94,7 +100,8 @@ class SchedulesRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ]);
+                Tables\Actions\DetachAction::make(),
+            ])
+            ->paginated(false);
     }
 }
