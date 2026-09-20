@@ -57,6 +57,7 @@ class GenerateNotifications extends Command
     {
         $invoices = Invoice::with('student')
             ->where('status', 'overdue')
+            ->where('remaining_balance', '>', 0)
             ->get();
 
         foreach ($invoices as $invoice) {
@@ -77,7 +78,7 @@ class GenerateNotifications extends Command
     {
         $today = now()->dayOfWeekIso;
 
-        $schedules = Schedule::with('student')
+        $schedules = Schedule::with('subject')
             ->where('status', 'active')
             ->where('day_of_week', $today)
             ->orderBy('start_time')
@@ -86,11 +87,13 @@ class GenerateNotifications extends Command
         foreach ($schedules as $schedule) {
             $key = 'schedule-today-'.$schedule->id.'-'.now()->format('Ymd');
 
+            $subject = $schedule->subject->name ?? 'Mata pelajaran belum diatur';
+
             AppNotification::createNotification(
                 type: 'schedule_today',
                 key: $key,
                 title: 'Jadwal Hari Ini',
-                message: 'Jadwal belajar '.($schedule->student->name ?? 'Siswa').
+                message: 'Mata pelajaran '.$subject.
                     ' bersama tutor '.$schedule->tutor_name.
                     ' pada '.$schedule->start_time.' - '.$schedule->end_time,
                 link: '/admin/schedules',
@@ -100,25 +103,43 @@ class GenerateNotifications extends Command
 
     protected function generateIncompleteDataNotifications(): void
     {
-        $students = Student::where('status', 'active')
-            ->where(function ($query) {
-                $query->whereNull('parent_phone')
-                    ->orWhere('parent_phone', '')
-                    ->orWhereNull('address')
-                    ->orWhere('address', '');
-            })
-            ->get();
+        $students = Student::query()
+            ->where('status', 'active')
+            ->get(['id', 'name', 'parent_name', 'parent_phone', 'address']);
+
+        $incompleteKeys = [];
 
         foreach ($students as $student) {
+            $isIncomplete = blank($student->parent_name)
+            || blank($student->parent_phone)
+            || blank($student->address);
+
+            if (! $isIncomplete) {
+                continue;
+            }
+
             $key = 'incomplete-student-'.$student->id;
+
+            $incompleteKeys[] = $key;
 
             AppNotification::createNotification(
                 type: 'incomplete_data',
                 key: $key,
                 title: 'Data Siswa Belum Lengkap',
-                message: 'Data siswa '.$student->name.' belum lengkap. Mohon lengkapi nomor HP orang tua atau alamat.',
+                message: 'Data siswa '.$student->name.' belum lengkap. Mohon lengkapi nama orang tua/wali, nomor HP orang tua, atau alamat.',
                 link: '/admin/students/'.$student->id.'/edit',
             );
+        }
+
+        // Hapus notifikasi siswa yang datanya sudah lengkap,
+        // sudah nonaktif, atau sudah tidak relevan.
+        $notificationQuery = AppNotification::where('type', 'incomplete_data')
+            ->where('key', 'like', 'incomplete-student-%');
+
+        if (empty($incompleteKeys)) {
+            $notificationQuery->delete();
+        } else {
+            $notificationQuery->whereNotIn('key', $incompleteKeys)->delete();
         }
     }
 }
