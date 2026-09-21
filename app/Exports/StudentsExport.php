@@ -28,7 +28,7 @@ class StudentsExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMap
     {
         return [
             'ID', 'Nama Siswa', 'Kelas', 'Paket', 'Orang Tua',
-            'No HP', 'Sekolah', 'Kelas Sekolah', 'Mapel', 'Alamat',
+            'No HP', 'Sekolah', 'Kelas Sekolah', 'Alamat',
             'Jatuh Tempo', 'Tanggal Gabung', 'Status', 'Dibuat',
         ];
     }
@@ -44,7 +44,6 @@ class StudentsExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMap
             $student->parent_phone,
             $student->school ?? '-',
             $student->school_grade ?? '-',
-            $student->subject ?? '-',
             $student->address ?? '-',
             'Tgl '.$student->due_day,
             $student->join_date?->format('d-m-Y') ?? '-',

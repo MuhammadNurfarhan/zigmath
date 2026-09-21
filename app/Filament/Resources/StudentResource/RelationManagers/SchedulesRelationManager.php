@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\StudentResource\RelationManagers;
 
 use App\Models\Schedule;
-use App\Models\Subject;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -30,19 +29,7 @@ class SchedulesRelationManager extends RelationManager
                     ->searchable()
                     ->preload()
                     ->nullable()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
-                            ->label('Nama Mata Pelajaran')
-                            ->required()
-                            ->maxLength(100),
-
-                        Forms\Components\TextInput::make('code')
-                            ->label('Kode')
-                            ->maxLength(20),
-                    ])
-                    ->createOptionUsing(function (array $data) {
-                        return Subject::create($data)->id;
-                    }),
+                    ->required(),
 
                 Forms\Components\Select::make('day_of_week')
                     ->label('Hari')

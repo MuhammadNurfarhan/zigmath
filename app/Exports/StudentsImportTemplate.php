@@ -28,7 +28,6 @@ class StudentsImportTemplate implements FromArray, WithColumnWidths, WithHeading
                 '081234567890',
                 'SD Negeri 1 Jakarta',
                 'Kelas 5',
-                'Matematika',
                 'Jl. Merdeka No. 10, Jakarta',
                 5,
                 '2026-01-15',
@@ -42,7 +41,6 @@ class StudentsImportTemplate implements FromArray, WithColumnWidths, WithHeading
                 '082345678901',
                 'SMP Harapan Bangsa',
                 'Kelas 8',
-                'Fisika, Matematika',
                 'Jl. Sudirman No. 25',
                 10,
                 '2026-02-01',
@@ -56,7 +54,6 @@ class StudentsImportTemplate implements FromArray, WithColumnWidths, WithHeading
                 '083456789012',
                 'SMP Negeri 3 Surabaya',
                 'Kelas 7',
-                'Bahasa Inggris',
                 'Jl. Pemuda No. 88, Surabaya',
                 15,
                 '2026-03-01',
@@ -75,7 +72,6 @@ class StudentsImportTemplate implements FromArray, WithColumnWidths, WithHeading
             'No HP',
             'Sekolah',
             'Kelas Sekolah',
-            'Mapel',
             'Alamat',
             'Jatuh Tempo (1-28)',
             'Tanggal Gabung (YYYY-MM-DD)',
@@ -93,11 +89,10 @@ class StudentsImportTemplate implements FromArray, WithColumnWidths, WithHeading
             'E' => 18, // No HP
             'F' => 25, // Sekolah
             'G' => 15, // Kelas Sekolah
-            'H' => 22, // Mapel
-            'I' => 30, // Alamat
-            'J' => 15, // Jatuh Tempo
-            'K' => 22, // Tanggal Gabung
-            'L' => 25, // Status
+            'H' => 30, // Alamat
+            'I' => 15, // Jatuh Tempo
+            'J' => 22, // Tanggal Gabung
+            'K' => 25, // Status
         ];
     }
 

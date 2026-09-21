@@ -88,10 +88,6 @@ class StudentResource extends Resource
                     ->label('Kelas Sekolah')
                     ->placeholder('Contoh: SD Kelas 5')
                     ->nullable(),
-
-                Forms\Components\TextInput::make('subject')
-                    ->label('Mata Pelajaran')
-                    ->nullable(),
             ])->columns(2),
 
             Forms\Components\Section::make('Data Orang Tua / Wali')->schema([

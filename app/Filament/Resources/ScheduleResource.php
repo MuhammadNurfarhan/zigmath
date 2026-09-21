@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScheduleResource\Pages;
 use App\Models\Schedule;
-use App\Models\Subject;
 use Carbon\Carbon;
 use Closure;
 use Filament\Forms;
@@ -88,19 +87,7 @@ class ScheduleResource extends Resource
                             ->searchable()
                             ->preload()
                             ->nullable()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('name')
-                                    ->label('Nama Mata Pelajaran')
-                                    ->required()
-                                    ->maxLength(100),
-
-                                Forms\Components\TextInput::make('code')
-                                    ->label('Kode')
-                                    ->maxLength(20),
-                            ])
-                            ->createOptionUsing(function (array $data) {
-                                return Subject::create($data)->id;
-                            }),
+                            ->required(),
 
                         Forms\Components\Select::make('day_of_week')
                             ->label('Hari')

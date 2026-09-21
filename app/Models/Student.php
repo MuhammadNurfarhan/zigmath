@@ -14,7 +14,7 @@ class Student extends Model
 
     protected $fillable = [
         'name', 'class_type', 'package_id', 'parent_name', 'parent_phone',
-        'school', 'school_grade', 'subject', 'address', 'due_day',
+        'school', 'school_grade', 'address', 'due_day',
         'join_date', 'status', 'notes', 'created_by', 'updated_by',
     ];
 
