@@ -15,7 +15,7 @@ class TodaySchedulesWidget extends Widget
     {
         $today = now()->dayOfWeekIso;
 
-        $schedules = Schedule::with('student')
+        $schedules = Schedule::with('students', 'subject')
             ->where('status', 'active')
             ->where('day_of_week', $today)
             ->orderBy('start_time')
