@@ -65,7 +65,8 @@ class RoleResource extends Resource
                     ->dateTime('d M Y'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Edit'),
                 Tables\Actions\DeleteAction::make(),
             ]);
     }
