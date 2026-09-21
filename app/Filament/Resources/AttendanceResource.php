@@ -86,6 +86,10 @@ class AttendanceResource extends Resource
                     ->label('Tutor')
                     ->placeholder('-'),
 
+                Tables\Columns\TextColumn::make('schedule.subject.name')
+                    ->label('Mata Pelajaran')
+                    ->placeholder('-'),
+
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()

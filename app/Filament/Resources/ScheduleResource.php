@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScheduleResource\Pages;
 use App\Models\Schedule;
+use App\Models\Subject;
+use Carbon\Carbon;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Component;
@@ -80,6 +82,26 @@ class ScheduleResource extends Resource
                             ->required()
                             ->maxLength(100),
 
+                        Forms\Components\Select::make('subject_id')
+                            ->label('Mata Pelajaran')
+                            ->relationship('subject', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->nullable()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Nama Mata Pelajaran')
+                                    ->required()
+                                    ->maxLength(100),
+
+                                Forms\Components\TextInput::make('code')
+                                    ->label('Kode')
+                                    ->maxLength(20),
+                            ])
+                            ->createOptionUsing(function (array $data) {
+                                return Subject::create($data)->id;
+                            }),
+
                         Forms\Components\Select::make('day_of_week')
                             ->label('Hari')
                             ->options(Schedule::getDayOptions()) // Pastikan method ini ada di Model
@@ -154,6 +176,11 @@ class ScheduleResource extends Resource
                     ->label('Tutor')
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('subject.name')
+                    ->label('Mata Pelajaran')
+                    ->placeholder('-')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('students.name')
                     ->label('Siswa')
                     ->badge()
@@ -172,10 +199,12 @@ class ScheduleResource extends Resource
                     ->formatStateUsing(fn (int $state): string => Schedule::getDayOptions()[$state] ?? '-'),
 
                 Tables\Columns\TextColumn::make('start_time')
-                    ->label('Jam Mulai'),
+                    ->label('Jam Mulai')
+                    ->formatStateUsing(fn (string $state): string => Carbon::parse($state)->format('H:i')),
 
                 Tables\Columns\TextColumn::make('end_time')
-                    ->label('Jam Selesai'),
+                    ->label('Jam Selesai')
+                    ->formatStateUsing(fn (string $state): string => Carbon::parse($state)->format('H:i')),
 
                 Tables\Columns\TextColumn::make('room')
                     ->label('Ruangan')
@@ -201,6 +230,12 @@ class ScheduleResource extends Resource
                 Tables\Filters\SelectFilter::make('day_of_week')
                     ->label('Hari')
                     ->options(Schedule::getDayOptions()),
+
+                Tables\Filters\SelectFilter::make('subject_id')
+                    ->label('Mata Pelajaran')
+                    ->relationship('subject', 'name')
+                    ->searchable()
+                    ->preload(),
 
                 // FIX: Filter siswa disesuaikan dengan relasi many-to-many
                 Tables\Filters\SelectFilter::make('students')
