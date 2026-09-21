@@ -9,16 +9,21 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Carbon\Carbon;
 
 class PaymentResource extends Resource
 {
     protected static ?string $model = Payment::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+
     protected static ?string $navigationGroup = 'Keuangan';
+
     protected static ?string $navigationLabel = 'Riwayat Pembayaran';
+
     protected static ?string $modelLabel = 'Pembayaran';
+
     protected static ?int $navigationSort = 2;
+
     protected static ?string $recordTitleAttribute = 'payment_no';
 
     public static function form(Form $form): Form
@@ -31,7 +36,7 @@ class PaymentResource extends Resource
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->getOptionLabelFromRecordUsing(fn($record) => $record->invoice_no . ' - ' . $record->student->name)
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->invoice_no.' - '.$record->student->name)
                     ->disabledOn('edit'),
 
                 Forms\Components\TextInput::make('amount')
@@ -107,14 +112,14 @@ class PaymentResource extends Resource
                 Tables\Columns\TextColumn::make('method')
                     ->label('Metode')
                     ->badge()
-                    ->color(fn(string $state): string => match($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'cash' => 'green',
                         'transfer' => 'blue',
                         'qris' => 'purple',
                         'e_wallet' => 'indigo',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => match($state) {
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
                         'cash' => '💵 Tunai',
                         'transfer' => '🏦 Transfer',
                         'qris' => '📱 QRIS',
@@ -138,7 +143,7 @@ class PaymentResource extends Resource
                     ->falseIcon('heroicon-o-x-mark')
                     ->trueColor('success')
                     ->falseColor('danger')
-                    ->tooltip(fn(Payment $record) => $record->proof_path ? 'Ada bukti upload' : 'Tanpa bukti'),
+                    ->tooltip(fn (Payment $record) => $record->proof_path ? 'Ada bukti upload' : 'Tanpa bukti'),
             ])
             ->defaultSort('paid_at', 'desc')
             ->filters([
@@ -157,8 +162,8 @@ class PaymentResource extends Resource
                     ])
                     ->query(function ($query, array $data) {
                         return $query
-                            ->when($data['paid_from'], fn($q, $date) => $q->whereDate('paid_at', '>=', $date))
-                            ->when($data['paid_until'], fn($q, $date) => $q->whereDate('paid_at', '<=', $date));
+                            ->when($data['paid_from'], fn ($q, $date) => $q->whereDate('paid_at', '>=', $date))
+                            ->when($data['paid_until'], fn ($q, $date) => $q->whereDate('paid_at', '<=', $date));
                     }),
             ])
             ->actions([
