@@ -51,7 +51,13 @@
                         class="font-medium {{ $record->isOverdue() ? 'text-red-600' : 'text-gray-900 dark:text-white' }}">
                         {{ $record->due_date->format('d F Y') }}
                         @if ($record->isOverdue())
-                            <span class="text-xs">(Terlambat {{ now()->diffInDays($record->due_date) }} hari)</span>
+                            @php
+                                $daysLate = max(1, (int) $record->due_date->copy()->startOfDay()->diffInDays(today()));
+                            @endphp
+
+                            <span class="text-xs">
+                                (Terlambat {{ $daysLate }} hari)
+                            </span>
                         @endif
                     </p>
                 </div>
