@@ -6,10 +6,9 @@
     <div class="space-y-6">
         {{-- Quick Actions --}}
         <div class="flex gap-3">
-            <a href="{{ InvoiceResource::getUrl('index') }}"
-                class="px-4 py-2 text-gray-600 dark:text-white rounded-lg hover:text-gray-900">
-                ← Back
-            </a>
+            <x-filament::button color="gray" tag="a" icon="heroicon-m-arrow-left" :href="InvoiceResource::getUrl('index')">
+                Kembali
+            </x-filament::button>
         </div>
 
         {{-- Header Invoice Info --}}
@@ -139,8 +138,7 @@
                     ({{ $record->payments->count() }}x)</h3>
                 <div class="space-y-3">
                     @foreach ($record->payments as $payment)
-                        <div
-                            class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 transition">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="font-semibold text-gray-900 dark:text-white">
