@@ -188,14 +188,14 @@ class StudentResource extends Resource
 
                 Tables\Columns\TextColumn::make('invoices_sum_remaining_balance')
                     ->label('Tunggakan')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->sortable()
                     ->searchable(false)
                     ->color(fn (?float $state): string => ($state ?? 0) > 0 ? 'danger' : 'success'),
 
                 Tables\Columns\TextColumn::make('invoices_sum_paid_amount')
                     ->label('Total Terbayar')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->sortable()
                     ->color('success'),
                 // Tables\Columns\TextColumn::make('attendance_rate')

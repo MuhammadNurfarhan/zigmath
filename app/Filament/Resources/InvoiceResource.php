@@ -147,18 +147,18 @@ class InvoiceResource extends Resource
 
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Tagihan')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('paid_amount')
                     ->label('Terbayar')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->color('success')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('remaining_balance')
                     ->label('Sisa')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->color(fn (Invoice $record): string => $record->remaining_balance > 0 ? 'danger' : 'success')
                     ->sortable(),
 
@@ -290,7 +290,7 @@ class InvoiceResource extends Resource
 
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
-                    ->visible(fn (Invoice $record) => $record->status === 'draft'),
+                    ->label('Edit'),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

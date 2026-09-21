@@ -81,16 +81,16 @@ class StudentInvoices extends Page implements HasForms, HasTable
 
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Tagihan')
-                    ->money('IDR'),
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.')),
 
                 Tables\Columns\TextColumn::make('paid_amount')
                     ->label('Terbayar')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->color('success'),
 
                 Tables\Columns\TextColumn::make('remaining_balance')
                     ->label('Sisa')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->color(fn (Invoice $record): string => $record->remaining_balance > 0 ? 'danger' : 'success'
                     ),
 

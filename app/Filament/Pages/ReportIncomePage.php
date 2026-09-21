@@ -86,7 +86,7 @@ class ReportIncomePage extends Page implements HasForms, HasTable
 
                 TextColumn::make('amount')
                     ->label('Nominal')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->sortable(),
             ])
             ->filters([

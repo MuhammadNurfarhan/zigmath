@@ -72,16 +72,16 @@ class ReportArrearsPage extends Page implements HasForms, HasTable
 
                 TextColumn::make('amount')
                     ->label('Tagihan')
-                    ->money('IDR'),
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.')),
 
                 TextColumn::make('paid_amount')
                     ->label('Terbayar')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->color('success'),
 
                 TextColumn::make('remaining_balance')
                     ->label('Sisa Tagihan')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->color('danger'),
 
                 TextColumn::make('status')

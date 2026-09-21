@@ -110,15 +110,13 @@ class PackageResource extends Resource
 
                 Tables\Columns\TextColumn::make('price')
                     ->label('Harga/Bulan')
-                    ->money('IDR')
-                    ->sortable()
-                    ->visible(fn ($record) => $record?->type === 'regular'),
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('price_per_session')
                     ->label('Harga/Sesi')
-                    ->money('IDR')
-                    ->sortable()
-                    ->visible(fn ($record) => $record?->type === 'private'),
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('duration_months')
                     ->label('Durasi')
@@ -143,7 +141,8 @@ class PackageResource extends Resource
                     ->label('Status Aktif'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Edit'),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

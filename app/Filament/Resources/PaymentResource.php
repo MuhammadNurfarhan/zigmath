@@ -105,7 +105,7 @@ class PaymentResource extends Resource
 
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Jumlah')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->sortable()
                     ->color('success'),
 
@@ -172,7 +172,8 @@ class PaymentResource extends Resource
                         // Tambahkan data tambahan untuk view jika perlu
                         return $data;
                     }),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Edit'),
                 Tables\Actions\DeleteAction::make()
                     ->modalHeading('Hapus Riwayat Pembayaran?')
                     ->modalDescription('Data pembayaran akan dihapus (soft delete). Pastikan ini bukan kesalahan fatal karena mempengaruhi saldo invoice.'),
