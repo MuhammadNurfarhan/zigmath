@@ -6,10 +6,12 @@ use App\Filament\Resources\InvoiceResource\Pages;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Student;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
+use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -17,6 +19,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class InvoiceResource extends Resource
@@ -287,7 +290,28 @@ class InvoiceResource extends Resource
                             ->success()
                             ->send();
                     }),
+                Action::make('printInvoice')
+                    ->label('Cetak Invoice')
+                    ->icon('heroicon-o-printer')
+                    ->color('gray')
+                    ->action(function (Invoice $record) {
+                        $record->load(['student.package', 'payments']);
+                        $pdf = Pdf::loadView('pdf.invoice', ['invoice' => $record]);
 
+                        $fileName = 'invoice-'.$record->invoice_no.'.pdf';
+                        Storage::disk('public')->put('temp/'.$fileName, $pdf->output());
+
+                        Notification::make()
+                            ->title('Invoice Berhasil Digenerate!')
+                            ->success()
+                            ->actions([
+                                NotificationAction::make('download')
+                                    ->label('Download / Cetak')
+                                    ->url(asset('storage/temp/'.$fileName), shouldOpenInNewTab: true)
+                                    ->button(),
+                            ])
+                            ->send();
+                    }),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
                     ->label('Edit'),

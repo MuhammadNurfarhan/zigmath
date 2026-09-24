@@ -4,11 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Models\Payment;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Actions\Action as NotificationAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentResource extends Resource
 {
@@ -167,6 +171,28 @@ class PaymentResource extends Resource
                     }),
             ])
             ->actions([
+                Tables\Actions\Action::make('printReceipt')
+                    ->label('Cetak Kwitansi')
+                    ->icon('heroicon-o-receipt-percent')
+                    ->color('info')
+                    ->action(function (Payment $record) {
+                        $record->load(['invoice.student']);
+                        $pdf = Pdf::loadView('pdf.receipt', ['payment' => $record]);
+
+                        $fileName = 'kwitansi-'.$record->payment_no.'.pdf';
+                        Storage::disk('public')->put('temp/'.$fileName, $pdf->output());
+
+                        Notification::make()
+                            ->title('Kwitansi Berhasil Digenerate!')
+                            ->success()
+                            ->actions([
+                                NotificationAction::make('download')
+                                    ->label('Download / Cetak')
+                                    ->url(asset('storage/temp/'.$fileName), shouldOpenInNewTab: true)
+                                    ->button(),
+                            ])
+                            ->send();
+                    }),
                 Tables\Actions\ViewAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         // Tambahkan data tambahan untuk view jika perlu

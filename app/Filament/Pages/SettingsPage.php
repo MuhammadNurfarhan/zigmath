@@ -101,6 +101,19 @@ class SettingsPage extends Page implements HasForms
                             ->default(0)
                             ->helperText('Jika fixed: nominal rupiah. Jika percent: persen dari tagihan.'),
 
+                        Toggle::make('invoice_show_logo')
+                            ->label('Tampilkan Logo di Invoice')
+                            ->default(true),
+
+                        TextInput::make('invoice_signature_name')
+                            ->label('Nama Penanggung Jawab Invoice')
+                            ->nullable(),
+
+                        Textarea::make('invoice_notes')
+                            ->label('Catatan Invoice')
+                            ->rows(2)
+                            ->nullable(),
+
                         Textarea::make('invoice_footer')
                             ->label('Footer Invoice')
                             ->rows(2)
