@@ -2,18 +2,25 @@
 
 namespace App\Filament\Pages;
 
+use App\Exports\IncomeReportExport;
 use App\Models\Payment;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Notifications\Actions\Action as NotificationAction;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportIncomePage extends Page implements HasForms, HasTable
 {
@@ -119,6 +126,58 @@ class ReportIncomePage extends Page implements HasForms, HasTable
                         'e_wallet' => 'E-Wallet',
                         'other' => 'Lainnya',
                     ]),
+            ])
+            ->headerActions([
+                Action::make('exportExcel')
+                    ->label('Export Excel')
+                    ->icon('heroicon-o-table-cells')
+                    ->color('success')
+                    ->action(function () {
+                        $fileName = 'laporan-pemasukan-'.now()->format('Y-m-d').'.xlsx';
+
+                        // Simpan ke storage/app/public/temp
+                        Excel::store(
+                            new IncomeReportExport($this->getFilteredTableQuery()),
+                            'temp/'.$fileName,
+                            'public'
+                        );
+
+                        Notification::make()
+                            ->title('Excel Berhasil Digenerate!')
+                            ->success()
+                            ->actions([
+                                NotificationAction::make('download')
+                                    ->label('Download Excel')
+                                    ->url(asset('storage/temp/'.$fileName), shouldOpenInNewTab: true)
+                                    ->button()
+                                    ->color('success'),
+                            ])
+                            ->send();
+                    }),
+
+                Action::make('exportPdf')
+                    ->label('Export PDF')
+                    ->icon('heroicon-o-document-text')
+                    ->color('danger')
+                    ->action(function () {
+                        $payments = $this->getFilteredTableQuery()->get();
+                        $pdf = Pdf::loadView('pdf.income-report', ['payments' => $payments]);
+
+                        $fileName = 'laporan-pemasukan-'.now()->format('Y-m-d').'.pdf';
+                        Storage::disk('public')->put('temp/'.$fileName, $pdf->output());
+
+                        Notification::make()
+                            ->title('PDF Berhasil Digenerate!')
+                            ->success()
+                            ->actions([
+                                NotificationAction::make('download')
+                                    ->label('Download PDF')
+                                    ->url(asset('storage/temp/'.$fileName), shouldOpenInNewTab: true)
+                                    ->button()
+                                    ->color('danger'),
+                            ])
+                            ->send();
+                    }),
             ])
             ->defaultSort('paid_at', 'desc');
     }
