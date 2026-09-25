@@ -134,7 +134,7 @@ class ReportStudentsPage extends Page implements HasForms, HasTable
                     ->icon('heroicon-o-table-cells')
                     ->color('success')
                     ->action(function () {
-                        $fileName = 'laporan-siswa-'.now()->format('Y-m-d-His').'.xlsx';
+                        $fileName = 'laporan-siswa-'.now()->format('Y-m-d').'.xlsx';
                         Excel::store(new StudentsReportExport($this->getFilteredTableQuery()), 'temp/'.$fileName, 'public');
 
                         Notification::make()->title('Excel Berhasil Digenerate!')->success()
@@ -149,7 +149,7 @@ class ReportStudentsPage extends Page implements HasForms, HasTable
                     ->action(function () {
                         $students = $this->getFilteredTableQuery()->get();
                         $pdf = Pdf::loadView('pdf.students-report', ['students' => $students]);
-                        $fileName = 'laporan-siswa-'.now()->format('Y-m-d-His').'.pdf';
+                        $fileName = 'laporan-siswa-'.now()->format('Y-m-d').'.pdf';
                         Storage::disk('public')->put('temp/'.$fileName, $pdf->output());
 
                         Notification::make()->title('PDF Berhasil Digenerate!')->success()
