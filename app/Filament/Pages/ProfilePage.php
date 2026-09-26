@@ -20,9 +20,9 @@ class ProfilePage extends Page implements HasForms
 
     protected static ?string $navigationGroup = 'Pengaturan';
 
-    protected static ?string $navigationLabel = 'Profil Admin';
+    protected static ?string $navigationLabel = 'Profil';
 
-    protected static ?string $title = 'Profil Admin';
+    protected static ?string $title = 'Profil';
 
     protected static ?int $navigationSort = 2;
 
