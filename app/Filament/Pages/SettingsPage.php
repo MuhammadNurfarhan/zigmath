@@ -3,7 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Setting;
-use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -57,12 +57,9 @@ class SettingsPage extends Page implements HasForms
                             ->default('Zigmath')
                             ->required(),
 
-                        FileUpload::make('bimbel_logo')
+                        Placeholder::make('logo_info')
                             ->label('Logo Bimbel')
-                            ->image()
-                            ->disk('public')
-                            ->directory('settings')
-                            ->maxSize(2048),
+                            ->content('Logo menggunakan file: public/images/zigmath-logo.png'),
 
                         Textarea::make('bimbel_address')
                             ->label('Alamat')
