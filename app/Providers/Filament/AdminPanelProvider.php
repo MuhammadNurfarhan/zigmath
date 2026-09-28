@@ -32,9 +32,9 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->passwordReset()
             ->brandName('Zigmath')
-            // ->brandLogo(asset('images/zigmath-logo.png'))
+            ->brandLogo(asset('images/zigmath-logo.png'))
             ->brandLogoHeight('2.5rem')
-            // ->favicon(asset('images/zigmath-favicon.png'))
+            ->favicon(asset('images/zigmath-favicon.png'))
             ->colors([
                 'primary' => Color::Indigo,
                 'danger' => Color::Rose,
