@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Filament\Resources\InvoiceResource;
 use App\Models\Invoice;
+use App\Models\Setting;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateInvoice extends CreateRecord
@@ -25,7 +26,8 @@ class CreateInvoice extends CreateRecord
         }
 
         // 1. Generate nomor invoice baru
-        $data['invoice_no'] = 'INV/ZGM/'.str_replace('-', '', $period).'/'.str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
+        $prefix = Setting::getInvoicePrefix(); // Mengambil dari database, default 'INV/ZGM/'
+        $data['invoice_no'] = $prefix.str_replace('-', '', $period).'/'.str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
 
         // 2. Pastikan paid_amount selalu bernilai 0 jika tidak diisi di form
         if (! isset($data['paid_amount'])) {

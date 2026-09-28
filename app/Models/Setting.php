@@ -21,15 +21,23 @@ class Setting extends Model
     // ==================== CONSTANTS ====================
 
     const TYPE_STRING = 'string';
+
     const TYPE_NUMBER = 'number';
+
     const TYPE_BOOLEAN = 'boolean';
+
     const TYPE_JSON = 'json';
+
     const TYPE_ARRAY = 'array';
 
     const GROUP_GENERAL = 'general';
+
     const GROUP_BRANDING = 'branding';
+
     const GROUP_FINANCE = 'finance';
+
     const GROUP_NOTIFICATION = 'notification';
+
     const GROUP_SYSTEM = 'system';
 
     // ==================== STATIC METHODS ====================
@@ -37,8 +45,7 @@ class Setting extends Model
     /**
      * Get setting value by key
      *
-     * @param string $key
-     * @param mixed $default
+     * @param  mixed  $default
      * @return mixed
      */
     public static function get(string $key, $default = null)
@@ -48,7 +55,7 @@ class Setting extends Model
         return Cache::remember($cacheKey, now()->addDay(), function () use ($key, $default) {
             $setting = self::where('key', $key)->first();
 
-            if (!$setting) {
+            if (! $setting) {
                 return $default;
             }
 
@@ -59,11 +66,7 @@ class Setting extends Model
     /**
      * Set setting value
      *
-     * @param string $key
-     * @param mixed $value
-     * @param string $type
-     * @param string $group
-     * @return self
+     * @param  mixed  $value
      */
     public static function set(string $key, $value, string $type = self::TYPE_STRING, string $group = self::GROUP_GENERAL): self
     {
@@ -82,9 +85,6 @@ class Setting extends Model
 
     /**
      * Get all settings by group
-     *
-     * @param string $group
-     * @return array
      */
     public static function getGroup(string $group): array
     {
@@ -101,10 +101,7 @@ class Setting extends Model
     /**
      * Set multiple settings at once
      *
-     * @param array $settings ['key' => 'value', ...]
-     * @param string $type
-     * @param string $group
-     * @return void
+     * @param  array  $settings  ['key' => 'value', ...]
      */
     public static function setMany(array $settings, string $type = self::TYPE_STRING, string $group = self::GROUP_GENERAL): void
     {
@@ -115,20 +112,16 @@ class Setting extends Model
 
     /**
      * Delete setting by key
-     *
-     * @param string $key
-     * @return bool
      */
     public static function forget(string $key): bool
     {
         Cache::forget("setting_{$key}");
+
         return self::where('key', $key)->delete();
     }
 
     /**
      * Clear all settings cache
-     *
-     * @return void
      */
     public static function clearCache(): void
     {
@@ -147,7 +140,7 @@ class Setting extends Model
      */
     public function castedValue()
     {
-        return match($this->type) {
+        return match ($this->type) {
             self::TYPE_NUMBER => (float) $this->value,
             self::TYPE_BOOLEAN => filter_var($this->value, FILTER_VALIDATE_BOOLEAN),
             self::TYPE_JSON => json_decode($this->value, true),
@@ -159,13 +152,11 @@ class Setting extends Model
     /**
      * Serialize value for storage
      *
-     * @param mixed $value
-     * @param string $type
-     * @return string
+     * @param  mixed  $value
      */
     protected static function serializeValue($value, string $type): string
     {
-        return match($type) {
+        return match ($type) {
             self::TYPE_NUMBER => (string) $value,
             self::TYPE_BOOLEAN => $value ? '1' : '0',
             self::TYPE_JSON => json_encode($value),
@@ -220,14 +211,6 @@ class Setting extends Model
     public static function getBimbelName(): string
     {
         return self::get('bimbel_name', 'Zigmath');
-    }
-
-    /**
-     * Get bimbel logo URL
-     */
-    public static function getBimbelLogo(): ?string
-    {
-        return self::get('bimbel_logo');
     }
 
     /**

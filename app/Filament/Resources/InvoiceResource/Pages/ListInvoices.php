@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Filament\Resources\InvoiceResource;
 use App\Models\Invoice;
+use App\Models\Setting;
 use App\Models\Student;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -134,7 +135,8 @@ class ListInvoices extends ListRecords
                         if ($maxInvoiceNo && preg_match('/(\d{4})$/', $maxInvoiceNo, $matches)) {
                             $seqNumber = ((int) $matches[1]) + 1;
                         }
-                        $invoiceNo = 'INV/ZGM/'.str_replace('-', '', $period).'/'.str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
+                        $prefix = Setting::getInvoicePrefix(); // Mengambil dari database, default 'INV/ZGM/'
+                        $invoiceNo = $prefix.str_replace('-', '', $period).'/'.str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
 
                         Invoice::create([
                             'invoice_no' => $invoiceNo,

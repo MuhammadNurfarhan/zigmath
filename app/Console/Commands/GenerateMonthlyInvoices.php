@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Invoice;
+use App\Models\Setting;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -109,7 +110,8 @@ class GenerateMonthlyInvoices extends Command
                 $seqNumber = ((int) $matches[1]) + 1;
             }
 
-            $invoiceNo = 'INV/ZGM/'.str_replace('-', '', $period).'/'.str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
+            $prefix = Setting::getInvoicePrefix(); // Mengambil dari database, default 'INV/ZGM/'
+            $invoiceNo = $prefix.str_replace('-', '', $period).'/'.str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
 
             Invoice::create([
                 'invoice_no' => $invoiceNo,

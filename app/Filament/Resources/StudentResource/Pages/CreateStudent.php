@@ -4,6 +4,7 @@ namespace App\Filament\Resources\StudentResource\Pages;
 
 use App\Filament\Resources\StudentResource;
 use App\Models\Invoice;
+use App\Models\Setting;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateStudent extends CreateRecord
@@ -56,7 +57,8 @@ class CreateStudent extends CreateRecord
 
             // Generate nomor invoice dengan sequence aman
             $seq = Invoice::where('period', $period)->withTrashed()->count() + 1;
-            $invoiceNo = 'INV/ZGM/'.str_replace('-', '', $period).'/'.str_pad($seq, 4, '0', STR_PAD_LEFT);
+            $prefix = Setting::getInvoicePrefix(); // Mengambil dari database, default 'INV/ZGM/'
+            $invoiceNo = $prefix.str_replace('-', '', $period).'/'.str_pad($seq, 4, '0', STR_PAD_LEFT);
 
             Invoice::create([
                 'invoice_no' => $invoiceNo,
