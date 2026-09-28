@@ -6,7 +6,7 @@
 
                 {{-- Bagian Kiri: Info Siswa & Tutor --}}
                 <div class="flex-1 min-w-0 mr-4">
-                    <p class="text-sm text-gray-500 mt-0.5">
+                    <p class="text-sm text-slate-900 mt-0.5">
                         Mata Pelajaran: <span class="font-medium">{{ $schedule->subject?->name ?? '-' }}</span>
                     </p>
                     <p class="text-sm text-gray-500 mt-0.5">
