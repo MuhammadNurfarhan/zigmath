@@ -63,6 +63,9 @@
 <body>
     <div class="header">
         <div>
+            {{-- Logo statis dari public/images --}}
+            @include('pdf.partials.logo')
+
             <div class="company-name">
                 {{ \App\Models\Setting::get('bimbel_name', 'Zigmath') }}
             </div>

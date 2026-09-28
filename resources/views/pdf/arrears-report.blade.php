@@ -51,6 +51,7 @@
 </head>
 
 <body>
+    @include('pdf.partials.logo')
     <h1>{{ \App\Models\Setting::get('bimbel_name', 'Zigmath') }}</h1>
     <h2>Laporan Tunggakan - {{ now()->translatedFormat('d M Y') }}</h2>
 
