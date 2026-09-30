@@ -2,6 +2,7 @@
 
 use App\Exports\StudentsImportTemplate;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -25,4 +26,21 @@ Route::middleware(['auth'])->group(function () {
             'template-import-siswa-zigmath.xlsx'
         );
     })->name('students.download-template');
+});
+
+Route::get('/health', function () {
+    try {
+        DB::connection()->getPdo();
+
+        return response()->json([
+            'status' => 'ok',
+            'app' => config('app.name'),
+            'timestamp' => now()->toIso8601String(),
+        ]);
+    } catch (Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Database connection failed',
+        ], 500);
+    }
 });
