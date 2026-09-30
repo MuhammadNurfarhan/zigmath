@@ -61,18 +61,43 @@
             @endif
 
             @if ($record->proof_path)
+                @php
+                    $proofUrl = Storage::url($record->proof_path);
+                    $proofExists = Storage::disk('public')->exists($record->proof_path);
+                @endphp
+
                 <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <p class="text-sm text-gray-500 mb-2">Bukti Pembayaran</p>
-                    <a href="{{ asset('storage/' . $record->proof_path) }}" target="_blank"
-                        class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        Lihat Bukti Pembayaran
-                    </a>
+
+                    @if ($proofExists)
+                        <div class="space-y-3">
+                            <a href="{{ $proofUrl }}" target="_blank" title="Klik untuk membuka ukuran penuh">
+                                <img src="{{ $proofUrl }}" alt="Bukti Pembayaran {{ $record->payment_no }}"
+                                    loading="lazy"
+                                    class="w-full max-h-96 object-contain rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 cursor-zoom-in hover:opacity-90 transition">
+                            </a>
+
+                            <a href="{{ $proofUrl }}" target="_blank"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-black dark:text-white rounded-lg hover:bg-indigo-700">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Buka Ukuran Penuh
+                            </a>
+                        </div>
+                    @else
+                        <div class="text-sm text-red-600">
+                            File bukti pembayaran tidak ditemukan.
+                        </div>
+
+                        <a href="{{ $proofUrl }}" target="_blank"
+                            class="mt-2 inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                            Coba Buka File
+                        </a>
+                    @endif
                 </div>
             @endif
         </div>
