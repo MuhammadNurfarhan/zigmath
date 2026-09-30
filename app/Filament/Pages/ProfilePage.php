@@ -30,6 +30,12 @@ class ProfilePage extends Page implements HasForms
 
     public ?array $data = [];
 
+    // ==================== AUTHORIZATION ====================
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view profile') ?? false;
+    }
+
     public function mount(): void
     {
         $this->form->fill([
@@ -86,6 +92,16 @@ class ProfilePage extends Page implements HasForms
 
     public function save(): void
     {
+        if (! auth()->user()?->can('update profile')) {
+            Notification::make()
+                ->title('⚠️ Akses Ditolak')
+                ->body('Anda tidak memiliki izin untuk mengubah profil.')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
         $state = $this->form->getState();
 
         $user = auth()->user();

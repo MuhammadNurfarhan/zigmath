@@ -24,6 +24,12 @@ class RekapAbsensiPage extends Page
 
     public int $year;
 
+    // ==================== AUTHORIZATION ====================
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view attendances') ?? false;
+    }
+
     public function mount(): void
     {
         $this->month = now()->month;

@@ -33,6 +33,12 @@ class SettingsPage extends Page implements HasForms
 
     public ?array $data = [];
 
+    // ==================== AUTHORIZATION ====================
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view settings') ?? false;
+    }
+
     public function mount(): void
     {
         $settings = Setting::all()
@@ -144,6 +150,16 @@ class SettingsPage extends Page implements HasForms
 
     public function save(): void
     {
+        if (! auth()->user()?->can('edit settings')) {
+            Notification::make()
+                ->title('⚠️ Akses Ditolak')
+                ->body('Anda tidak memiliki izin untuk mengubah pengaturan sistem.')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
         $state = $this->form->getState();
 
         foreach ($state as $key => $value) {

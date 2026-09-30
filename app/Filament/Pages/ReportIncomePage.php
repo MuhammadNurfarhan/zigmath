@@ -40,6 +40,12 @@ class ReportIncomePage extends Page implements HasForms, HasTable
 
     public ?array $data = [];
 
+    // ==================== AUTHORIZATION ====================
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view reports') ?? false;
+    }
+
     public function form(Form $form): Form
     {
         return $form
@@ -132,6 +138,7 @@ class ReportIncomePage extends Page implements HasForms, HasTable
                     ->label('Export Excel')
                     ->icon('heroicon-o-table-cells')
                     ->color('success')
+                    ->visible(fn () => auth()->user()?->can('export reports') ?? false)
                     ->action(function () {
                         $fileName = 'laporan-pemasukan-'.now()->format('Y-m-d').'.xlsx';
 
@@ -159,6 +166,7 @@ class ReportIncomePage extends Page implements HasForms, HasTable
                     ->label('Export PDF')
                     ->icon('heroicon-o-document-text')
                     ->color('danger')
+                    ->visible(fn () => auth()->user()?->can('export reports') ?? false)
                     ->action(function () {
                         $payments = $this->getFilteredTableQuery()->get();
                         $pdf = Pdf::loadView('pdf.income-report', ['payments' => $payments]);

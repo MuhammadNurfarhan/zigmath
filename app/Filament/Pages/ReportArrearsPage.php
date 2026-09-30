@@ -39,6 +39,12 @@ class ReportArrearsPage extends Page implements HasForms, HasTable
 
     public ?array $data = [];
 
+    // ==================== AUTHORIZATION ====================
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view reports') ?? false;
+    }
+
     public function form(Form $form): Form
     {
         return $form
@@ -127,6 +133,7 @@ class ReportArrearsPage extends Page implements HasForms, HasTable
                     ->label('Export Excel')
                     ->icon('heroicon-o-table-cells')
                     ->color('success')
+                    ->visible(fn () => auth()->user()?->can('export reports') ?? false)
                     ->action(function () {
                         $fileName = 'laporan-tunggakan-'.now()->format('Y-m-d').'.xlsx';
                         Excel::store(new ArrearsReportExport($this->getFilteredTableQuery()), 'temp/'.$fileName, 'public');
@@ -140,6 +147,7 @@ class ReportArrearsPage extends Page implements HasForms, HasTable
                     ->label('Export PDF')
                     ->icon('heroicon-o-document-text')
                     ->color('danger')
+                    ->visible(fn () => auth()->user()?->can('export reports') ?? false)
                     ->action(function () {
                         $invoices = $this->getFilteredTableQuery()->get();
                         $pdf = Pdf::loadView('pdf.arrears-report', ['invoices' => $invoices]);

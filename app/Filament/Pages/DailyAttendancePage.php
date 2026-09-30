@@ -29,6 +29,12 @@ class DailyAttendancePage extends Page
 
     public array $attendances = [];
 
+    // ==================== AUTHORIZATION ====================
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('create attendances') ?? false;
+    }
+
     public function mount(): void
     {
         $this->date = now()->toDateString();
@@ -99,6 +105,17 @@ class DailyAttendancePage extends Page
 
     public function save(): void
     {
+        // Proteksi Tambahan: Double-check permission sebelum menyimpan
+        if (! auth()->user()?->can('create attendances')) {
+            Notification::make()
+                ->title('⚠️ Akses Ditolak')
+                ->body('Anda tidak memiliki izin untuk menyimpan absensi.')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
         if (! $this->date || ! $this->schedule_id) {
             Notification::make()
                 ->title('Pilih tanggal dan jadwal terlebih dahulu.')
