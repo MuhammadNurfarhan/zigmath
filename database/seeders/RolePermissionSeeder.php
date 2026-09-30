@@ -32,6 +32,12 @@ class RolePermissionSeeder extends Seeder
             'edit packages',
             'delete packages',
 
+            // Mata Pelajaran
+            'view subjects',
+            'create subjects',
+            'edit subjects',
+            'delete subjects',
+
             // Invoice
             'view invoices',
             'create invoices',
@@ -134,6 +140,11 @@ class RolePermissionSeeder extends Seeder
             'edit packages',
             'delete packages',
 
+            'view subjects',
+            'create subjects',
+            'edit subjects',
+            'delete subjects',
+
             'view invoices',
             'create invoices',
             'edit invoices',
@@ -199,6 +210,10 @@ class RolePermissionSeeder extends Seeder
             'export payments',
             'print payments',
 
+            'view schedules',
+
+            'view attendances',
+
             'view reports',
             'export reports',
             'print reports',
@@ -225,6 +240,10 @@ class RolePermissionSeeder extends Seeder
             'import students',
 
             'view packages',
+
+            'view subjects',
+            'create subjects',
+            'edit subjects',
 
             'view invoices',
 
