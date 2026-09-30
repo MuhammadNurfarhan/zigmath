@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class AppNotificationResource extends Resource
 {
@@ -21,6 +22,27 @@ class AppNotificationResource extends Resource
     protected static ?string $navigationLabel = 'Notifikasi';
 
     protected static ?int $navigationSort = 1;
+
+    // ==================== AUTHORIZATION ====================
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('view notifications') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->can('manage notifications') ?? false;
+    }
 
     public static function form(Form $form): Form
     {

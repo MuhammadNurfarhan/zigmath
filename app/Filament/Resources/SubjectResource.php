@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class SubjectResource extends Resource
 {
@@ -21,6 +22,27 @@ class SubjectResource extends Resource
     protected static ?string $navigationLabel = 'Mata Pelajaran';
 
     protected static ?int $navigationSort = 3;
+
+    // ==================== AUTHORIZATION ====================
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('view subjects') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create subjects') ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()?->can('edit subjects') ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->can('delete subjects') ?? false;
+    }
 
     public static function form(Form $form): Form
     {

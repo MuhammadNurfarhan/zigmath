@@ -8,6 +8,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Role;
 
 class RoleResource extends Resource
@@ -21,6 +22,38 @@ class RoleResource extends Resource
     protected static ?string $navigationLabel = 'Role & Hak Akses';
 
     protected static ?int $navigationSort = 2;
+
+    // ==================== AUTHORIZATION ====================
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('view roles') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create roles') ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        // Proteksi: Cegah pengeditan role Super Admin agar tidak terkunci
+        if (in_array($record->name, ['Super Admin', 'super-admin'])) {
+            return false;
+        }
+
+        return auth()->user()?->can('edit roles') ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        // 🛡️ Proteksi: Cegah penghapusan role inti sistem
+        $coreRoles = ['Super Admin', 'super-admin', 'Admin', 'admin', 'Finance', 'finance', 'Operator', 'operator'];
+        if (in_array($record->name, $coreRoles)) {
+            return false;
+        }
+
+        return auth()->user()?->can('delete roles') ?? false;
+    }
 
     public static function form(Form $form): Form
     {

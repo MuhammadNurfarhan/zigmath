@@ -22,6 +22,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
@@ -39,6 +40,27 @@ class StudentResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    // ==================== AUTHORIZATION ====================
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('view students') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create students') ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()?->can('edit students') ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->can('delete students') ?? false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -242,7 +264,8 @@ class StudentResource extends Resource
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('info')
                     ->url(route('students.download-template'), shouldOpenInNewTab: true)
-                    ->tooltip('Download template Excel untuk import'),
+                    ->tooltip('Download template Excel untuk import')
+                    ->visible(fn () => auth()->user()?->can('import students')),
 
                 // ==========================================
                 // 📥 EXPORT EXCEL
@@ -259,7 +282,8 @@ class StudentResource extends Resource
                             new StudentsExport($filteredQuery),
                             'zigmath-siswa-'.now()->format('Y-m-d_His').'.xlsx'
                         );
-                    }),
+                    })
+                    ->visible(fn () => auth()->user()?->can('export students')),
 
                 // ==========================================
                 // 📤 IMPORT EXCEL (TANPA ACTION DI FORM)
@@ -349,11 +373,13 @@ class StudentResource extends Resource
                                 ->duration(15000)
                                 ->send();
                         }
-                    }),
+                    })
+                    ->visible(fn () => auth()->user()?->can('import students')),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->authorize('delete students'),
                 ]),
             ]);
     }

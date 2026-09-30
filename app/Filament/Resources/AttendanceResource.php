@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class AttendanceResource extends Resource
 {
@@ -21,6 +22,27 @@ class AttendanceResource extends Resource
     protected static ?string $navigationLabel = ' Riwayat Absensi';
 
     protected static ?int $navigationSort = 3;
+
+    // ==================== AUTHORIZATION ====================
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('view attendances') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create attendances') ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()?->can('edit attendances') ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->can('delete attendances') ?? false;
+    }
 
     public static function form(Form $form): Form
     {

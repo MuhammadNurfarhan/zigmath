@@ -28,6 +28,7 @@ class ListInvoices extends ListRecords
                 ->label('🎯 Generate Invoice Private (Massal)')
                 ->icon('heroicon-o-bolt')
                 ->color('warning')
+                ->visible(fn () => auth()->user()?->can('generate invoices') ?? false)
                 ->form([
                     TextInput::make('period')
                         ->label('Periode Bulan (Tahun-Bulan)')
@@ -78,6 +79,16 @@ class ListInvoices extends ListRecords
                     ];
                 })
                 ->action(function (array $data): void {
+                    if (! auth()->user()?->can('generate invoices')) {
+                        Notification::make()
+                            ->title('⚠️ Akses Ditolak')
+                            ->body('Anda tidak memiliki izin untuk generate invoice massal.')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
                     $period = $data['period'];
                     $created = 0;
                     $skipped = 0;

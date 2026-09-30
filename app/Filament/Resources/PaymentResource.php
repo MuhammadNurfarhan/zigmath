@@ -12,6 +12,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class PaymentResource extends Resource
@@ -29,6 +30,27 @@ class PaymentResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'payment_no';
+
+    // ==================== AUTHORIZATION ====================
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('view payments') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create payments') ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()?->can('edit payments') ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->can('delete payments') ?? false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -175,6 +197,7 @@ class PaymentResource extends Resource
                     ->label('Cetak Kwitansi')
                     ->icon('heroicon-o-receipt-percent')
                     ->color('info')
+                    ->visible(fn () => auth()->user()?->can('print payments'))
                     ->action(function (Payment $record) {
                         $record->load(['invoice.student']);
                         $pdf = Pdf::loadView('pdf.receipt', ['payment' => $record]);

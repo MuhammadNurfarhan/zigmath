@@ -17,6 +17,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -37,6 +38,27 @@ class InvoiceResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'invoice_no';
+
+    // ==================== AUTHORIZATION ====================
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('view invoices') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create invoices') ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()?->can('edit invoices') ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->can('delete invoices') ?? false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -217,7 +239,7 @@ class InvoiceResource extends Resource
                     ->label('Bayar')
                     ->icon('heroicon-o-banknotes')
                     ->color('success')
-                    ->visible(fn (Invoice $record) => in_array($record->status, ['unpaid', 'partial', 'overdue']))
+                    ->visible(fn (Invoice $record) => in_array($record->status, ['unpaid', 'partial', 'overdue']) && auth()->user()?->can('pay invoices'))
                     ->form([
                         Forms\Components\TextInput::make('remaining_display')
                             ->label('Sisa Tagihan')
@@ -294,6 +316,7 @@ class InvoiceResource extends Resource
                     ->label('Cetak Invoice')
                     ->icon('heroicon-o-printer')
                     ->color('gray')
+                    ->visible(fn () => auth()->user()?->can('print invoices'))
                     ->action(function (Invoice $record) {
                         $record->load(['student.package', 'payments']);
                         $pdf = Pdf::loadView('pdf.invoice', ['invoice' => $record]);

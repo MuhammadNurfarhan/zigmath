@@ -13,6 +13,7 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class ScheduleResource extends Resource
 {
@@ -25,6 +26,27 @@ class ScheduleResource extends Resource
     protected static ?string $navigationLabel = 'Jadwal Belajar';
 
     protected static ?int $navigationSort = 1;
+
+    // ==================== AUTHORIZATION ====================
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('view schedules') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create schedules') ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()?->can('edit schedules') ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->can('delete schedules') ?? false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -154,7 +176,7 @@ class ScheduleResource extends Resource
         return $table
             ->query(
                 Schedule::query()
-                    ->with(['students']) // FIX: dari 'student' menjadi 'students'
+                    ->with(['students'])
                     ->orderBy('day_of_week')
                     ->orderBy('start_time')
             )
@@ -168,11 +190,11 @@ class ScheduleResource extends Resource
                     ->placeholder('-')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('students.name')
-                    ->label('Siswa')
-                    ->badge()
-                    ->limit(3)
-                    ->toggleable(),
+                // Tables\Columns\TextColumn::make('students.name')
+                //     ->label('Siswa')
+                //     ->badge()
+                //     ->limit(3)
+                //     ->toggleable(),
 
                 Tables\Columns\TextColumn::make('students_count')
                     ->counts('students')
