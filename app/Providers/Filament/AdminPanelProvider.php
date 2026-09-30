@@ -75,8 +75,8 @@ class AdminPanelProvider extends PanelProvider
                 'Data Master',
                 'Keuangan',
                 'Operasional',
-                'Notifikasi',
                 'Laporan',
+                'Notifikasi',
                 'Manajemen User',
                 'Pengaturan',
             ]);
