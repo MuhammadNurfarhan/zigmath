@@ -9,9 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar
@@ -47,7 +44,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function canAccessPanel(Panel $panel): bool
     {
         // ✅ PERBAIKAN: Hapus hasVerifiedEmail() untuk development
-        return $this->is_active;
+        return $this->is_active && $this->hasRole(['super-admin', 'admin', 'finance', 'operator']);
     }
 
     public function getFilamentAvatarUrl(): ?string
@@ -87,6 +84,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeSuperAdmins($query)
+    {
+        return $query->role('super-admin');
     }
 
     public function scopeAdmins($query)
@@ -205,67 +207,5 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             'finance' => '💰 Finance',
             'operator' => '🎓 Operator',
         ];
-    }
-
-    public static function createDefaultRoles(): void
-    {
-        // Reset cache permission Spatie
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
-
-        // 1. Kumpulkan semua permission unik dari semua role
-        $roles = [
-            'super-admin' => ['*'],
-            'admin' => [
-                'view-students', 'create-students', 'edit-students', 'delete-students',
-                'view-packages', 'create-packages', 'edit-packages', 'delete-packages',
-                'view-invoices', 'create-invoices', 'edit-invoices', 'delete-invoices',
-                'view-payments', 'create-payments', 'edit-payments', 'delete-payments',
-                'view-schedules', 'create-schedules', 'edit-schedules', 'delete-schedules',
-                'view-attendances', 'create-attendances', 'edit-attendances', 'delete-attendances',
-                'view-reports', 'export-reports',
-                'view-settings', 'edit-settings',
-            ],
-            'finance' => [
-                'view-students',
-                'view-invoices', 'create-invoices', 'edit-invoices',
-                'view-payments', 'create-payments', 'edit-payments',
-                'view-reports', 'export-reports',
-            ],
-            'operator' => [
-                'view-students', 'create-students', 'edit-students',
-                'view-packages',
-                'view-schedules', 'create-schedules', 'edit-schedules',
-                'view-attendances', 'create-attendances', 'edit-attendances',
-            ],
-        ];
-
-        // 2. Buat semua permission terlebih dahulu
-        $allPermissions = [];
-        foreach ($roles as $rolePermissions) {
-            if ($rolePermissions === ['*']) {
-                continue;
-            }
-
-            foreach ($rolePermissions as $permission) {
-                if (! in_array($permission, $allPermissions)) {
-                    $allPermissions[] = $permission;
-                    Permission::firstOrCreate(['name' => $permission]);
-                }
-            }
-        }
-
-        // 3. Buat role dan assign permissions
-        foreach ($roles as $roleName => $permissions) {
-            $role = Role::firstOrCreate(['name' => $roleName]);
-
-            if ($roleName === 'super-admin') {
-                // Super admin dapat SEMUA permission
-                $role->syncPermissions(Permission::all());
-            } else {
-                $role->syncPermissions($permissions);
-            }
-        }
-
-        echo "✅ Roles dan permissions berhasil dibuat!\n";
     }
 }
