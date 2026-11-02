@@ -25,7 +25,7 @@ class ListInvoices extends ListRecords
             CreateAction::make(),
 
             Action::make('generatePrivateBulk')
-                ->label('🎯 Generate Invoice Private (Massal)')
+                ->label('Generate Invoice Private (Massal)')
                 ->icon('heroicon-o-bolt')
                 ->color('warning')
                 ->visible(fn () => auth()->user()?->can('generate invoices') ?? false)
