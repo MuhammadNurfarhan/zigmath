@@ -70,7 +70,7 @@ class PaymentResource extends Resource
                     ->numeric()
                     ->prefix('Rp')
                     ->required()
-                    ->minValue(0),
+                    ->minValue(1),
 
                 Forms\Components\Select::make('method')
                     ->label('Metode Pembayaran')

@@ -52,7 +52,7 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithValidation
                 }
 
                 // Normalisasi nilai
-                $classType = strtolower(trim($row['kelas'] ?? ''));
+                $classType = strtolower(trim($row['kelas'] ?? $row['kelas_reguler_private'] ?? $row['kelas_regulerprivate'] ?? ''));
                 if (! in_array($classType, ['regular', 'private', 'reguler'])) {
                     throw ValidationException::withMessages([
                         "row_{$rowNumber}" => "Kelas harus 'Reguler' atau 'Private'.",
@@ -60,7 +60,7 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithValidation
                 }
                 $classType = ($classType === 'reguler') ? 'regular' : $classType;
 
-                $status = strtolower(trim($row['status'] ?? 'active'));
+                $status = strtolower(trim($row['status'] ?? $row['status_aktif_nonaktif_cuti'] ?? 'active'));
                 if (! in_array($status, ['active', 'inactive', 'cuti', 'aktif', 'nonaktif'])) {
                     $status = 'active';
                 }
@@ -72,14 +72,17 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithValidation
                 }
 
                 // Parse tanggal join (YYYY-MM-DD atau DD-MM-YYYY)
+                $joinDateRaw = $row['tanggal_gabung'] ?? $row['tanggal_gabung_yyyy_mm_dd'] ?? null;
                 $joinDate = null;
-                if (! empty($row['tanggal_gabung'])) {
+                if (! empty($joinDateRaw)) {
                     try {
-                        $joinDate = Carbon::parse($row['tanggal_gabung'])->format('Y-m-d');
+                        $joinDate = Carbon::parse($joinDateRaw)->format('Y-m-d');
                     } catch (\Exception $e) {
                         $joinDate = null;
                     }
                 }
+
+                $dueDay = (int) ($row['jatuh_tempo'] ?? $row['jatuh_tempo_1_28'] ?? 1);
 
                 Student::create([
                     'name' => trim($row['nama_siswa']),
@@ -89,9 +92,8 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithValidation
                     'parent_phone' => trim($row['no_hp']),
                     'school' => $row['sekolah'] ?? null,
                     'school_grade' => $row['kelas_sekolah'] ?? null,
-                    'subject' => $row['mapel'] ?? null,
                     'address' => $row['alamat'] ?? null,
-                    'due_day' => (int) ($row['jatuh_tempo'] ?? 1),
+                    'due_day' => $dueDay,
                     'join_date' => $joinDate,
                     'status' => $status,
                     'created_by' => auth()->id(),
@@ -112,6 +114,16 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithValidation
                 ];
             }
         }
+    }
+
+    public function prepareForValidation(array $data, int $index): array
+    {
+        $data['kelas'] = $data['kelas'] ?? $data['kelas_reguler_private'] ?? $data['kelas_regulerprivate'] ?? null;
+        $data['jatuh_tempo'] = $data['jatuh_tempo'] ?? $data['jatuh_tempo_1_28'] ?? 1;
+        $data['tanggal_gabung'] = $data['tanggal_gabung'] ?? $data['tanggal_gabung_yyyy_mm_dd'] ?? null;
+        $data['status'] = $data['status'] ?? $data['status_aktif_nonaktif_cuti'] ?? 'active';
+
+        return $data;
     }
 
     public function rules(): array

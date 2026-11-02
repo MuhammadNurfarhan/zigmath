@@ -13,6 +13,7 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class ScheduleResource extends Resource
@@ -174,12 +175,7 @@ class ScheduleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(
-                Schedule::query()
-                    ->with(['students'])
-                    ->orderBy('day_of_week')
-                    ->orderBy('start_time')
-            )
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['students', 'subject']))
             ->columns([
                 Tables\Columns\TextColumn::make('tutor_name')
                     ->label('Tutor')

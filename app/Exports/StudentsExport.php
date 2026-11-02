@@ -53,7 +53,7 @@ class StudentsExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMap
                 'cuti' => 'Cuti',
                 default => $student->status,
             },
-            $student->created_at->format('d-m-Y H:i'),
+            $student->created_at?->format('d-m-Y H:i') ?? '-',
         ];
     }
 

@@ -50,6 +50,11 @@ class Student extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');

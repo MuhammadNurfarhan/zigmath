@@ -94,15 +94,18 @@ class StudentInvoices extends Page implements HasForms, HasTable
                     ->color(fn (Invoice $record): string => $record->remaining_balance > 0 ? 'danger' : 'success'
                     ),
 
-                Tables\Columns\BadgeColumn::make('status')
+                Tables\Columns\TextColumn::make('status')
                     ->label('Status')
-                    ->colors([
-                        'gray' => 'draft',
-                        'danger' => 'unpaid',
-                        'warning' => 'partial',
-                        'success' => 'paid',
-                        'danger' => 'overdue',
-                    ])
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'draft' => 'gray',
+                        'unpaid' => 'danger',
+                        'partial' => 'warning',
+                        'paid' => 'success',
+                        'overdue' => 'danger',
+                        'cancelled' => 'gray',
+                        default => 'gray',
+                    })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'draft' => 'Draft',
                         'unpaid' => 'Belum Bayar',
@@ -110,6 +113,7 @@ class StudentInvoices extends Page implements HasForms, HasTable
                         'paid' => 'Lunas',
                         'overdue' => 'Terlambat',
                         'cancelled' => 'Dibatalkan',
+                        default => ucfirst($state),
                     }),
             ])
             ->actions([
@@ -117,7 +121,7 @@ class StudentInvoices extends Page implements HasForms, HasTable
                     ->label('Input Bayar')
                     ->icon('heroicon-o-banknotes')
                     ->color('success')
-                    ->visible(fn (Invoice $record) => in_array($record->status, ['unpaid', 'partial', 'overdue']))
+                    ->visible(fn (Invoice $record) => in_array($record->status, ['unpaid', 'partial', 'overdue']) && auth()->user()?->can('pay invoices'))
                     ->form([
                         Forms\Components\TextInput::make('total_amount')
                             ->label('Total Tagihan')

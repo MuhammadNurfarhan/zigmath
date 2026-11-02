@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class AttendanceResource extends Resource
@@ -89,11 +90,7 @@ class AttendanceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(
-                Attendance::query()
-                    ->with(['student', 'schedule'])
-                    ->orderByDesc('date')
-            )
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['student', 'schedule']))
             ->columns([
                 Tables\Columns\TextColumn::make('date')
                     ->label('Tanggal')

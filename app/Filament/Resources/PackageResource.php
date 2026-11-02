@@ -121,12 +121,14 @@ class PackageResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\BadgeColumn::make('type')
+                Tables\Columns\TextColumn::make('type')
                     ->label('Tipe')
-                    ->colors([
-                        'primary' => 'regular',
-                        'warning' => 'private',
-                    ])
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'regular' => 'primary',
+                        'private' => 'warning',
+                        default => 'gray',
+                    })
                     ->formatStateUsing(fn (string $state): string => $state === 'regular' ? '📚 Reguler' : '👤 Private'
                     ),
 

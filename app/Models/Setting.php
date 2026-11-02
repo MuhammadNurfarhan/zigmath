@@ -68,9 +68,23 @@ class Setting extends Model
      *
      * @param  mixed  $value
      */
-    public static function set(string $key, $value, string $type = self::TYPE_STRING, string $group = self::GROUP_GENERAL): self
+    public static function set(string $key, $value, ?string $type = null, ?string $group = null): self
     {
         $setting = self::firstOrNew(['key' => $key]);
+
+        // Keep existing type if not explicitly provided, or infer from value
+        if ($type === null) {
+            $type = $setting->exists ? $setting->type : match (true) {
+                is_bool($value) => self::TYPE_BOOLEAN,
+                is_int($value) || is_float($value) => self::TYPE_NUMBER,
+                is_array($value) => self::TYPE_JSON,
+                default => self::TYPE_STRING,
+            };
+        }
+
+        if ($group === null) {
+            $group = $setting->exists ? $setting->group : self::GROUP_GENERAL;
+        }
 
         $setting->value = self::serializeValue($value, $type);
         $setting->type = $type;
@@ -117,7 +131,7 @@ class Setting extends Model
     {
         Cache::forget("setting_{$key}");
 
-        return self::where('key', $key)->delete();
+        return (bool) self::where('key', $key)->delete();
     }
 
     /**

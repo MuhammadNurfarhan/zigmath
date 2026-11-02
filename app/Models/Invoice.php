@@ -30,6 +30,11 @@ class Invoice extends Model
         return $this->belongsTo(Student::class);
     }
 
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
@@ -42,7 +47,40 @@ class Invoice extends Model
 
     public function isOverdue(): bool
     {
-        return ! $this->isPaid() && $this->due_date->isPast();
+        return ! $this->isPaid() && ($this->due_date?->isPast() ?? false);
+    }
+
+    public function recalculateBalance(): void
+    {
+        $totalPaid = (float) $this->payments()->sum('amount');
+        $this->paid_amount = $totalPaid;
+        $netAmount = max(0, (float) $this->amount - (float) $this->discount);
+        $this->remaining_balance = max(0, $netAmount - $totalPaid);
+
+        if ($this->remaining_balance <= 0) {
+            $this->status = 'paid';
+        } elseif ($totalPaid > 0) {
+            $this->status = 'partial';
+        } else {
+            $this->status = ($this->due_date && $this->due_date->isPast()) ? 'overdue' : 'unpaid';
+        }
+
+        $this->save();
+    }
+
+    public static function generateInvoiceNumber(string $period): string
+    {
+        $maxInvoiceNo = static::withTrashed()
+            ->where('period', $period)
+            ->max('invoice_no');
+
+        $seqNumber = 1;
+        if ($maxInvoiceNo && preg_match('/(\d{4})$/', $maxInvoiceNo, $matches)) {
+            $seqNumber = ((int) $matches[1]) + 1;
+        }
+
+        $prefix = Setting::getInvoicePrefix();
+        return $prefix . str_replace('-', '', $period) . '/' . str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
     }
 
     public function scopeUnpaid($query)

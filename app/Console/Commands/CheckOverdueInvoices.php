@@ -13,8 +13,9 @@ class CheckOverdueInvoices extends Command
 
     public function handle(): int
     {
-        $overdueCount = Invoice::whereIn('status', ['unpaid', 'partial'])
-            ->where('due_date', '<', now())
+        $overdueCount = Invoice::where('status', 'unpaid')
+            ->whereDate('due_date', '<', today())
+            ->where('remaining_balance', '>', 0)
             ->update(['status' => 'overdue']);
 
         $this->info("✅ {$overdueCount} invoice diupdate menjadi overdue.");

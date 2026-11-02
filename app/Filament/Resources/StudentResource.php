@@ -171,9 +171,14 @@ class StudentResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\BadgeColumn::make('class_type')
+                Tables\Columns\TextColumn::make('class_type')
                     ->label('Kelas')
-                    ->colors(['primary' => 'regular', 'warning' => 'private'])
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'regular' => 'primary',
+                        'private' => 'warning',
+                        default => 'gray',
+                    })
                     ->formatStateUsing(fn (string $state): string => $state === 'regular' ? 'Reguler' : 'Private'
                     ),
 
@@ -195,17 +200,20 @@ class StudentResource extends Resource
                     ->formatStateUsing(fn (int $state): string => "Tgl {$state}")
                     ->sortable(),
 
-                Tables\Columns\BadgeColumn::make('status')
+                Tables\Columns\TextColumn::make('status')
                     ->label('Status')
-                    ->colors([
-                        'success' => 'active',
-                        'danger' => 'inactive',
-                        'warning' => 'cuti',
-                    ])
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'active' => 'success',
+                        'inactive' => 'danger',
+                        'cuti' => 'warning',
+                        default => 'gray',
+                    })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'active' => 'Aktif',
                         'inactive' => 'Nonaktif',
                         'cuti' => 'Cuti',
+                        default => ucfirst($state),
                     }),
 
                 Tables\Columns\TextColumn::make('invoices_sum_remaining_balance')

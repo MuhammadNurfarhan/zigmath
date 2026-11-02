@@ -8,6 +8,6 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-Schedule::command('zigmath:generate-invoices')->dailyAt('00:05');
+Schedule::command('zigmath:generate-invoices')->monthlyOn(1, '00:05');
 Schedule::command('zigmath:check-overdue')->dailyAt('01:00');
 Schedule::command('zigmath:generate-notifications')->dailyAt('06:00');

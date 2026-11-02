@@ -66,16 +66,16 @@ class StudentsImportTemplate implements FromArray, WithColumnWidths, WithHeading
     {
         return [
             'Nama Siswa',
-            'Kelas (Reguler/Private)',
+            'Kelas',
             'Paket',
             'Orang Tua',
             'No HP',
             'Sekolah',
             'Kelas Sekolah',
             'Alamat',
-            'Jatuh Tempo (1-28)',
-            'Tanggal Gabung (YYYY-MM-DD)',
-            'Status (Aktif/Nonaktif/Cuti)',
+            'Jatuh Tempo',
+            'Tanggal Gabung',
+            'Status',
         ];
     }
 

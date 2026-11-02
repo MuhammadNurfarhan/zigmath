@@ -7,6 +7,7 @@ use App\Models\Setting;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class GenerateMonthlyInvoices extends Command
 {
@@ -100,34 +101,30 @@ class GenerateMonthlyInvoices extends Command
             $dueDay = $student->due_day ?? 5;
             $dueDate = $currentDate->copy()->day(min($dueDay, 28));
 
-            // Gunakan max() di level database (lebih cepat dan aman untuk soft delete)
-            $maxInvoiceNo = Invoice::withTrashed()
-                ->where('period', $period)
-                ->max('invoice_no');
+            try {
+                DB::transaction(function () use ($student, $period, $dueDate, $amount, $notes, &$created) {
+                    $invoiceNo = Invoice::generateInvoiceNumber($period);
 
-            $seqNumber = 1;
-            if ($maxInvoiceNo && preg_match('/(\d{4})$/', $maxInvoiceNo, $matches)) {
-                $seqNumber = ((int) $matches[1]) + 1;
+                    Invoice::create([
+                        'invoice_no' => $invoiceNo,
+                        'student_id' => $student->id,
+                        'period' => $period,
+                        'due_date' => $dueDate,
+                        'amount' => $amount,
+                        'discount' => 0,
+                        'paid_amount' => 0,
+                        'remaining_balance' => $amount,
+                        'status' => 'unpaid',
+                        'notes' => $notes,
+                        'created_by' => null,
+                    ]);
+
+                    $created++;
+                });
+            } catch (\Throwable $e) {
+                $this->error("Gagal generate invoice siswa {$student->name}: {$e->getMessage()}");
             }
 
-            $prefix = Setting::getInvoicePrefix(); // Mengambil dari database, default 'INV/ZGM/'
-            $invoiceNo = $prefix.str_replace('-', '', $period).'/'.str_pad($seqNumber, 4, '0', STR_PAD_LEFT);
-
-            Invoice::create([
-                'invoice_no' => $invoiceNo,
-                'student_id' => $student->id,
-                'period' => $period,
-                'due_date' => $dueDate,
-                'amount' => $amount,
-                'discount' => 0,
-                'paid_amount' => 0,
-                'remaining_balance' => $amount,
-                'status' => 'unpaid',
-                'notes' => $notes,
-                'created_by' => null,
-            ]);
-
-            $created++;
             $bar->advance();
         }
 

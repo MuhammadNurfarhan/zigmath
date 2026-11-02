@@ -206,6 +206,7 @@ class InvoiceResource extends Resource
                         'paid' => 'Lunas',
                         'overdue' => 'Terlambat',
                         'cancelled' => 'Dibatalkan',
+                        default => ucfirst($state),
                     }),
             ])
             ->defaultSort('due_date', 'asc')

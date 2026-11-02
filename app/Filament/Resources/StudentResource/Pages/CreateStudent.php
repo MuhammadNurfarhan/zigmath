@@ -56,9 +56,7 @@ class CreateStudent extends CreateRecord
             }
 
             // Generate nomor invoice dengan sequence aman
-            $seq = Invoice::where('period', $period)->withTrashed()->count() + 1;
-            $prefix = Setting::getInvoicePrefix(); // Mengambil dari database, default 'INV/ZGM/'
-            $invoiceNo = $prefix.str_replace('-', '', $period).'/'.str_pad($seq, 4, '0', STR_PAD_LEFT);
+            $invoiceNo = Invoice::generateInvoiceNumber($period);
 
             Invoice::create([
                 'invoice_no' => $invoiceNo,
