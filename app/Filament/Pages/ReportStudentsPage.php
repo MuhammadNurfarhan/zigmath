@@ -105,17 +105,17 @@ class ReportStudentsPage extends Page implements HasForms, HasTable
                     }),
 
                 TextColumn::make('invoices_sum_amount')
-                    ->label('Total Tagihan')
-                    ->money('IDR'),
+                    ->label('Tagihan')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.')),
 
                 TextColumn::make('invoices_sum_paid_amount')
-                    ->label('Total Terbayar')
-                    ->money('IDR')
+                    ->label('Terbayar')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->color('success'),
 
                 TextColumn::make('invoices_sum_remaining_balance')
                     ->label('Sisa Tagihan')
-                    ->money('IDR')
+                    ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->color(fn (?float $state): string => ($state ?? 0) > 0 ? 'danger' : 'success'),
             ])
             ->filters([

@@ -182,7 +182,7 @@ class InvoiceResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('remaining_balance')
-                    ->label('Sisa')
+                    ->label('Sisa Tagihan')
                     ->formatStateUsing(fn (?float $state): string => 'Rp '.number_format($state ?? 0, 0, ',', '.'))
                     ->color(fn (Invoice $record): string => $record->remaining_balance > 0 ? 'danger' : 'success')
                     ->sortable(),
