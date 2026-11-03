@@ -86,7 +86,7 @@ class SettingsPage extends Page implements HasForms
                         TextInput::make('invoice_prefix')
                             ->label('Prefix Invoice')
                             ->default('INV/ZGM/')
-                            ->required(),
+                            ->placeholder('INV/ZGM/'),
 
                         Select::make('late_fee_type')
                             ->label('Jenis Denda Keterlambatan')

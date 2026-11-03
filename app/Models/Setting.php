@@ -248,7 +248,7 @@ class Setting extends Model
      */
     public static function getInvoicePrefix(): string
     {
-        return self::get('invoice_prefix', 'INV/ZGM');
+        return self::get('invoice_prefix', 'INV/ZGM/');
     }
 
     /**

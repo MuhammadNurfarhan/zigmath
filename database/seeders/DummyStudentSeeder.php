@@ -33,7 +33,6 @@ class DummyStudentSeeder extends Seeder
                 'parent_phone' => '08'.fake()->numerify('##########'), // 08 + 10 angka acak
                 'school' => fake()->randomElement($schools),
                 'school_grade' => fake()->randomElement(['SD Kelas 5', 'SMP Kelas 8', 'SMA Kelas 11']),
-                'subject' => fake()->randomElement($subjects),
                 'address' => fake()->address(),
                 'due_day' => fake()->numberBetween(1, 28),
                 'join_date' => fake()->dateTimeBetween('-3 months', 'now'),

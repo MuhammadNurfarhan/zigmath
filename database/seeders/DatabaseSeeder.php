@@ -9,9 +9,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            PackageSeeder::class,          // 1. Buat Paket Bimbel
-            RolePermissionSeeder::class,   // 2. Buat Roles (Super Admin, Finance, dll)
-            DummyStudentSeeder::class,     // 3. Buat 20 Siswa Dummy
+            RolePermissionSeeder::class,   // 1. Buat Roles & Permissions
+            UserSeeder::class,             // 2. Buat User (Super Admin, Admin, Finance, Operator)
+            SubjectSeeder::class,          // 3. Buat Mata Pelajaran
+            PackageSeeder::class,          // 4. Buat Paket Bimbel
+            DummyStudentSeeder::class,     // 5. Buat 20 Siswa Dummy
         ]);
     }
 }

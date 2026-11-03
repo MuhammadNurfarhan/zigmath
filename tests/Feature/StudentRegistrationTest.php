@@ -21,7 +21,10 @@ class StudentRegistrationTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create();
+        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+
+        $this->admin = User::factory()->create(['is_active' => true]);
+        $this->admin->assignRole('super-admin');
 
         $this->package = Package::create([
             'name' => 'Reguler SD - Bulanan',
@@ -46,7 +49,6 @@ class StudentRegistrationTest extends TestCase
                 'parent_phone' => '081234567890',
                 'school' => 'SD Negeri 1',
                 'school_grade' => 'SD Kelas 5',
-                'subject' => 'Matematika',
                 'address' => 'Jl. Test No. 1',
                 'due_day' => 5,
                 'join_date' => now()->toDateString(),
