@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             SubjectSeeder::class,          // 3. Buat Mata Pelajaran
             PackageSeeder::class,          // 4. Buat Paket Bimbel
             DummyStudentSeeder::class,     // 5. Buat 20 Siswa Dummy
+            SettingSeeder::class,          // 6. Inisialisasi Pengaturan Sistem
         ]);
     }
 }
